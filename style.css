@@ -1,0 +1,1417 @@
+/* =========================================================
+   ORTOPÉDICA ALTEROSA
+   ESTILO COMPLETO DO SISTEMA
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --azul: #0756a6;
+    --azul-escuro: #043d78;
+    --azul-claro: #eaf4ff;
+    --azul-hover: #0b68c7;
+
+    --branco: #ffffff;
+    --fundo: #f3f6fa;
+
+    --texto: #1e293b;
+    --texto-secundario: #64748b;
+
+    --borda: #dce3eb;
+
+    --verde: #16a34a;
+    --verde-claro: #dcfce7;
+
+    --vermelho: #dc2626;
+    --vermelho-claro: #fee2e2;
+
+    --amarelo: #f59e0b;
+    --amarelo-claro: #fef3c7;
+
+    --sombra: 0 4px 18px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    min-height: 100vh;
+}
+
+
+/* =========================================================
+   CABEÇALHO
+========================================================= */
+
+.topo {
+    width: 100%;
+    min-height: 92px;
+
+    background: linear-gradient(
+        135deg,
+        var(--azul-escuro),
+        var(--azul)
+    );
+
+    color: white;
+
+    padding: 18px 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-icon {
+    width: 58px;
+    height: 58px;
+
+    background: white;
+    color: var(--azul);
+
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 19px;
+    font-weight: 900;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+.logo-area h1 {
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.logo-area p {
+    margin-top: 5px;
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+.data-atual {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: capitalize;
+
+    background: rgba(255,255,255,0.12);
+
+    padding: 10px 15px;
+
+    border-radius: 8px;
+}
+
+
+/* =========================================================
+   MENU PRINCIPAL
+========================================================= */
+
+.menu {
+    width: 100%;
+
+    background: white;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 25px;
+
+    border-bottom: 1px solid var(--borda);
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+
+    overflow-x: auto;
+}
+
+.menu-btn {
+    position: relative;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: var(--texto-secundario);
+
+    padding: 18px 25px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: all 0.25s ease;
+}
+
+.menu-btn:hover {
+    color: var(--azul);
+    background: var(--azul-claro);
+}
+
+.menu-btn.ativo {
+    color: var(--azul);
+    background: var(--azul-claro);
+}
+
+.menu-btn.ativo::after {
+    content: "";
+
+    position: absolute;
+
+    left: 15px;
+    right: 15px;
+    bottom: 0;
+
+    height: 4px;
+
+    background: var(--azul);
+
+    border-radius: 4px 4px 0 0;
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container {
+    width: 94%;
+    max-width: 1450px;
+
+    margin: 30px auto 60px;
+}
+
+.aba {
+    display: none;
+    animation: aparecer 0.25s ease;
+}
+
+.aba.ativa {
+    display: block;
+}
+
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   TÍTULOS
+========================================================= */
+
+.titulo-aba {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 25px;
+}
+
+.titulo-aba h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--texto);
+}
+
+.titulo-aba p {
+    color: var(--texto-secundario);
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.card {
+    background: white;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 14px;
+
+    padding: 24px;
+
+    margin-bottom: 20px;
+
+    box-shadow: var(--sombra);
+}
+
+.card h3 {
+    color: var(--texto);
+
+    font-size: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.grid-2 {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 18px;
+}
+
+.grid-3 {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 18px;
+}
+
+.grid-4 {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        2fr
+        1fr
+        1fr;
+
+    gap: 18px;
+
+    margin-bottom: 18px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.campo label {
+    color: #334155;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+input,
+select {
+    width: 100%;
+
+    height: 44px;
+
+    padding: 0 13px;
+
+    border: 1px solid #cfd8e3;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: var(--texto);
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: all 0.2s ease;
+}
+
+input::placeholder {
+    color: #94a3b8;
+}
+
+input:hover,
+select:hover {
+    border-color: #9bb6d2;
+}
+
+input:focus,
+select:focus {
+    border-color: var(--azul);
+
+    box-shadow:
+        0 0 0 3px rgba(7, 86, 166, 0.12);
+}
+
+input[readonly] {
+    background: #f1f5f9;
+
+    color: #475569;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ÁREA DO PRODUTO
+========================================================= */
+
+.produto-venda-area {
+    background: linear-gradient(
+        135deg,
+        #f8fbff,
+        #eef6ff
+    );
+
+    border: 1px solid #cfe2f7;
+
+    border-radius: 12px;
+
+    padding: 22px;
+
+    margin: 20px 0;
+}
+
+.produto-venda-area h3 {
+    color: var(--azul);
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   RESUMO DA VENDA
+========================================================= */
+
+.resumo-venda {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 15px;
+
+    margin: 20px 0;
+}
+
+.resumo-item {
+    min-width: 210px;
+
+    padding: 18px 22px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.resumo-item span {
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.resumo-item strong {
+    font-size: 22px;
+}
+
+.resumo-item.destaque {
+    background: linear-gradient(
+        135deg,
+        var(--azul),
+        var(--azul-hover)
+    );
+
+    color: white;
+
+    border: none;
+}
+
+.resumo-item.destaque span {
+    color: #dbeafe;
+}
+
+
+/* =========================================================
+   PAGAMENTO
+========================================================= */
+
+.pagamento {
+    margin-top: 25px;
+}
+
+.pagamento h3 {
+    margin-bottom: 15px;
+}
+
+.pagamentos-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 12px;
+}
+
+.pagamento-option {
+    min-height: 65px;
+
+    background: white;
+
+    border: 2px solid #e2e8f0;
+
+    border-radius: 10px;
+
+    padding: 12px 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.pagamento-option:hover {
+    border-color: var(--azul);
+
+    background: var(--azul-claro);
+}
+
+.pagamento-option:has(input:checked) {
+    border-color: var(--azul);
+
+    background: var(--azul-claro);
+
+    color: var(--azul);
+
+    box-shadow:
+        0 0 0 2px rgba(7,86,166,0.08);
+}
+
+.pagamento-option input {
+    width: 17px;
+    height: 17px;
+}
+
+.area-dinheiro {
+    margin-top: 18px;
+
+    padding: 18px;
+
+    background: #fffaf0;
+
+    border: 1px solid #f4d28b;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   BOTÕES
+========================================================= */
+
+.btn {
+    border: none;
+
+    min-height: 42px;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-principal {
+    background: var(--azul);
+
+    color: white;
+
+    box-shadow:
+        0 3px 8px rgba(7,86,166,0.20);
+}
+
+.btn-principal:hover {
+    background: var(--azul-hover);
+
+    box-shadow:
+        0 5px 12px rgba(7,86,166,0.25);
+}
+
+.btn-secundario {
+    background: #e8edf3;
+
+    color: #334155;
+}
+
+.btn-secundario:hover {
+    background: #dce3eb;
+}
+
+.btn-perigo {
+    background: var(--vermelho);
+
+    color: white;
+}
+
+.btn-perigo:hover {
+    background: #b91c1c;
+}
+
+.btn-sucesso {
+    background: var(--verde);
+
+    color: white;
+}
+
+.btn-sucesso:hover {
+    background: #15803d;
+}
+
+.btn-aviso {
+    background: var(--amarelo);
+
+    color: white;
+}
+
+.btn-aviso:hover {
+    background: #d97706;
+}
+
+.btn-pequeno {
+    min-height: 34px;
+
+    padding: 7px 11px;
+
+    font-size: 12px;
+
+    margin: 2px;
+}
+
+.acoes {
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
+.tabela-card {
+    padding: 0;
+
+    overflow: hidden;
+}
+
+.tabela-card h3 {
+    padding: 22px 24px 5px;
+}
+
+.tabela-scroll {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    min-width: 850px;
+}
+
+thead th {
+    background: #f1f5f9;
+
+    color: #475569;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.3px;
+
+    padding: 15px;
+
+    text-align: left;
+
+    border-bottom: 1px solid var(--borda);
+}
+
+tbody td {
+    padding: 15px;
+
+    font-size: 14px;
+
+    border-bottom: 1px solid #edf1f5;
+
+    vertical-align: middle;
+}
+
+tbody tr {
+    transition: background 0.15s ease;
+}
+
+tbody tr:hover {
+    background: #f8fbff;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 6px 10px;
+
+    border-radius: 30px;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.status-ok {
+    color: #166534;
+    background: var(--verde-claro);
+}
+
+.status-baixo {
+    color: #92400e;
+    background: var(--amarelo-claro);
+}
+
+.status-esgotado {
+    color: #991b1b;
+    background: var(--vermelho-claro);
+}
+
+.status-ativo {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+.status-vencendo {
+    color: #92400e;
+    background: var(--amarelo-claro);
+}
+
+.status-atrasado {
+    color: #991b1b;
+    background: var(--vermelho-claro);
+}
+
+.status-devolvido {
+    color: #166534;
+    background: var(--verde-claro);
+}
+
+
+/* =========================================================
+   PESQUISA
+========================================================= */
+
+.barra-pesquisa {
+    position: relative;
+}
+
+.barra-pesquisa input {
+    height: 48px;
+
+    font-size: 14px;
+
+    padding-left: 16px;
+}
+
+
+/* =========================================================
+   INDICADORES
+========================================================= */
+
+.indicadores {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+.indicador {
+    position: relative;
+
+    overflow: hidden;
+
+    background: white;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 14px;
+
+    padding: 21px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    box-shadow: var(--sombra);
+}
+
+.indicador::after {
+    content: "";
+
+    position: absolute;
+
+    width: 70px;
+    height: 70px;
+
+    right: -25px;
+    bottom: -30px;
+
+    background: var(--azul-claro);
+
+    border-radius: 50%;
+}
+
+.indicador > span {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: var(--azul-claro);
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+
+    z-index: 1;
+}
+
+.indicador small {
+    display: block;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+
+    margin-bottom: 5px;
+}
+
+.indicador strong {
+    display: block;
+
+    font-size: 19px;
+
+    color: var(--texto);
+
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================================
+   FECHAMENTO
+========================================================= */
+
+.fechamento {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    background: linear-gradient(
+        135deg,
+        #eef6ff,
+        #f7fbff
+    );
+
+    border-color: #c8def5;
+}
+
+.fechamento h3 {
+    color: var(--azul);
+
+    margin-bottom: 5px;
+}
+
+.fechamento p {
+    color: var(--texto-secundario);
+}
+
+
+/* =========================================================
+   SUBMENU DE ALUGUÉIS
+========================================================= */
+
+.sub-menu {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    background: white;
+
+    padding: 7px;
+
+    margin-bottom: 22px;
+
+    border: 1px solid var(--borda);
+
+    border-radius: 12px;
+
+    box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+
+    overflow-x: auto;
+}
+
+.sub-btn {
+    border: none;
+
+    background: transparent;
+
+    color: var(--texto-secundario);
+
+    padding: 11px 17px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition: 0.2s;
+}
+
+.sub-btn:hover {
+    background: var(--azul-claro);
+
+    color: var(--azul);
+}
+
+.sub-btn.ativo {
+    background: var(--azul);
+
+    color: white;
+
+    box-shadow:
+        0 3px 7px rgba(7,86,166,0.2);
+}
+
+.sub-aba {
+    display: none;
+}
+
+.sub-aba.aluguel-ativa {
+    display: block;
+
+    animation: aparecer 0.25s ease;
+}
+
+.titulo-sub {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.titulo-sub h3 {
+    font-size: 19px;
+}
+
+
+/* =========================================================
+   RESUMO DO ALUGUEL
+========================================================= */
+
+.resumo-aluguel {
+    background: linear-gradient(
+        135deg,
+        #f7fbff,
+        #eef6ff
+    );
+
+    border: 1px solid #cfe2f7;
+
+    padding: 22px;
+
+    border-radius: 12px;
+
+    margin-top: 18px;
+
+    display: flex;
+
+    justify-content: flex-end;
+}
+
+.resumo-aluguel div {
+    text-align: right;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.resumo-aluguel span {
+    color: var(--texto-secundario);
+
+    font-size: 13px;
+}
+
+.resumo-aluguel strong {
+    color: var(--azul);
+
+    font-size: 25px;
+}
+
+
+/* =========================================================
+   ALERTA
+========================================================= */
+
+.alerta {
+    background: var(--vermelho-claro);
+
+    color: #991b1b;
+
+    border: 1px solid #fecaca;
+
+    border-left: 5px solid var(--vermelho);
+
+    padding: 16px 18px;
+
+    border-radius: 10px;
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+
+    box-shadow: 0 2px 7px rgba(220,38,38,0.08);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.58);
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 9999;
+
+    backdrop-filter: blur(3px);
+}
+
+.modal.aberto {
+    display: flex;
+}
+
+.modal-conteudo {
+    width: 100%;
+
+    max-width: 650px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: white;
+
+    border-radius: 15px;
+
+    padding: 27px;
+
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+
+    position: relative;
+}
+
+.fechar-modal {
+    position: absolute;
+
+    top: 10px;
+    right: 15px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 25px;
+
+    cursor: pointer;
+}
+
+.fechar-modal:hover {
+    background: var(--vermelho-claro);
+
+    color: var(--vermelho);
+}
+
+
+/* =========================================================
+   UTILITÁRIOS
+========================================================= */
+
+.oculto {
+    display: none !important;
+}
+
+hr {
+    border: none;
+
+    border-top: 1px solid #e2e8f0;
+
+    margin: 25px 0;
+}
+
+
+/* =========================================================
+   RECIBO
+========================================================= */
+
+.recibo {
+    display: none;
+}
+
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .indicadores {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pagamentos-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .topo {
+        padding: 17px 20px;
+    }
+
+    .data-atual {
+        display: none;
+    }
+
+    .container {
+        width: 94%;
+        margin-top: 22px;
+    }
+
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .resumo-venda {
+        flex-direction: column;
+    }
+
+    .resumo-item {
+        width: 100%;
+    }
+
+    .titulo-aba,
+    .titulo-sub {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 15px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .topo {
+        min-height: 75px;
+    }
+
+    .logo-icon {
+        width: 46px;
+        height: 46px;
+    }
+
+    .logo-area h1 {
+        font-size: 20px;
+    }
+
+    .logo-area p {
+        display: none;
+    }
+
+    .menu {
+        padding: 0 8px;
+    }
+
+    .menu-btn {
+        padding: 15px 16px;
+
+        font-size: 12px;
+    }
+
+    .container {
+        width: 92%;
+    }
+
+    .titulo-aba h2 {
+        font-size: 23px;
+    }
+
+    .card {
+        padding: 17px;
+    }
+
+    .indicadores {
+        grid-template-columns: 1fr;
+    }
+
+    .pagamentos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .acoes .btn {
+        width: 100%;
+    }
+
+    .fechamento {
+        align-items: stretch;
+
+        flex-direction: column;
+    }
+
+    .fechamento .btn {
+        width: 100%;
+    }
+
+    .sub-menu {
+        width: 100%;
+    }
+
+    .sub-btn {
+        font-size: 12px;
+
+        padding: 10px 12px;
+    }
+}
+
+
+/* =========================================================
+   IMPRESSÃO DO RECIBO
+========================================================= */
+
+@media print {
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    #reciboImpressao,
+    #reciboImpressao * {
+        visibility: visible !important;
+    }
+
+    #reciboImpressao {
+        display: block !important;
+
+        position: absolute;
+
+        left: 0;
+        top: 0;
+
+        width: 100%;
+
+        padding: 10px;
+
+        color: #000;
+
+        background: white;
+
+        font-family: Arial, Helvetica, sans-serif;
+
+        font-size: 12px;
+    }
+
+    .recibo-cabecalho {
+        text-align: center;
+    }
+
+    .recibo-cabecalho h1 {
+        font-size: 20px;
+
+        margin-bottom: 5px;
+    }
+
+    .recibo h2 {
+        text-align: center;
+
+        font-size: 15px;
+
+        margin: 12px 0;
+    }
+
+    .recibo h3 {
+        font-size: 15px;
+    }
+
+    .recibo p {
+        margin: 6px 0;
+    }
+
+    .linha-recibo {
+        border-top: 1px dashed #000;
+
+        margin: 12px 0;
+    }
+
+    .assinatura {
+        margin-top: 45px;
+
+        text-align: center;
+    }
+
+    @page {
+        size: 80mm auto;
+
+        margin: 5mm;
+    }
+}

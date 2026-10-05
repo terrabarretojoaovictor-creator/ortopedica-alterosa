@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ortopédica Alterosa</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="topo">
+
+        <div class="logo-area">
+            <div class="logo-icon">OA</div>
+
+            <div>
+                <h1>Ortopédica Alterosa</h1>
+                <p>Sistema de vendas, estoque e aluguéis</p>
+            </div>
+        </div>
+
+        <div class="data-atual" id="dataAtual"></div>
+
+    </header>
+
+
+    <!-- MENU -->
+    <nav class="menu">
+
+        <button class="menu-btn ativo" onclick="abrirAba('pedidos', this)">
+            🛒 Novo Pedido
+        </button>
+
+        <button class="menu-btn" onclick="abrirAba('estoque', this)">
+            📦 Estoque
+        </button>
+
+        <button class="menu-btn" onclick="abrirAba('historico', this)">
+            📋 Histórico
+        </button>
+
+        <button class="menu-btn" onclick="abrirAba('alugueis', this)">
+            ♿ Aluguéis
+        </button>
+
+    </nav>
+
+
+    <main class="container">
+
+
+        <!-- ===================================================== -->
+        <!-- NOVO PEDIDO -->
+        <!-- ===================================================== -->
+
+        <section id="pedidos" class="aba ativa">
+
+            <div class="titulo-aba">
+                <div>
+                    <h2>Novo Pedido</h2>
+                    <p>Registre uma nova venda</p>
+                </div>
+            </div>
+
+
+            <div class="card">
+
+                <div class="grid-2">
+
+                    <div class="campo">
+                        <label>Nome do cliente</label>
+                        <input
+                            type="text"
+                            id="clienteVenda"
+                            placeholder="Digite o nome do cliente"
+                        >
+                    </div>
+
+
+                    <div class="campo">
+                        <label>CPF</label>
+                        <input
+                            type="text"
+                            id="cpfVenda"
+                            placeholder="CPF do cliente"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="produto-venda-area">
+
+                    <h3>Produto</h3>
+
+                    <div class="grid-3">
+
+                        <div class="campo">
+                            <label>Produto</label>
+
+                            <select id="produtoVenda" onchange="selecionarProdutoVenda()">
+                                <option value="">Selecione um produto</option>
+                            </select>
+                        </div>
+
+
+                        <div class="campo">
+                            <label>Código</label>
+
+                            <input
+                                type="text"
+                                id="codigoVenda"
+                                readonly
+                                placeholder="Automático"
+                            >
+                        </div>
+
+
+                        <div class="campo">
+                            <label>Preço</label>
+
+                            <input
+                                type="number"
+                                id="precoVenda"
+                                readonly
+                                step="0.01"
+                                placeholder="R$ 0,00"
+                            >
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid-2">
+
+                        <div class="campo">
+                            <label>Quantidade</label>
+
+                            <input
+                                type="number"
+                                id="quantidadeVenda"
+                                min="1"
+                                value="1"
+                                onchange="calcularVenda()"
+                            >
+                        </div>
+
+
+                        <div class="campo">
+                            <label>Total do produto</label>
+
+                            <input
+                                type="text"
+                                id="totalProdutoVenda"
+                                readonly
+                                value="R$ 0,00"
+                            >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RESUMO -->
+                <div class="resumo-venda">
+
+                    <div class="resumo-item">
+                        <span>Subtotal</span>
+                        <strong id="subtotalVenda">R$ 0,00</strong>
+                    </div>
+
+                    <div class="resumo-item destaque">
+                        <span>Total do pedido</span>
+                        <strong id="totalVenda">R$ 0,00</strong>
+                    </div>
+
+                </div>
+
+
+                <!-- PAGAMENTO -->
+                <div class="pagamento">
+
+                    <h3>Forma de pagamento</h3>
+
+                    <div class="pagamentos-grid">
+
+                        <label class="pagamento-option">
+                            <input
+                                type="radio"
+                                name="formaPagamento"
+                                value="Pix"
+                                onchange="alterarPagamento()"
+                            >
+                            <span>💠 PIX</span>
+                        </label>
+
+
+                        <label class="pagamento-option">
+                            <input
+                                type="radio"
+                                name="formaPagamento"
+                                value="Débito"
+                                onchange="alterarPagamento()"
+                            >
+                            <span>💳 Débito</span>
+                        </label>
+
+
+                        <label class="pagamento-option">
+                            <input
+                                type="radio"
+                                name="formaPagamento"
+                                value="Crédito"
+                                onchange="alterarPagamento()"
+                            >
+                            <span>💳 Crédito</span>
+                        </label>
+
+
+                        <label class="pagamento-option">
+                            <input
+                                type="radio"
+                                name="formaPagamento"
+                                value="Dinheiro"
+                                onchange="alterarPagamento()"
+                            >
+                            <span>💵 Dinheiro</span>
+                        </label>
+
+                    </div>
+
+
+                    <div id="areaDinheiro" class="area-dinheiro oculto">
+
+                        <div class="grid-2">
+
+                            <div class="campo">
+                                <label>Valor recebido</label>
+
+                                <input
+                                    type="number"
+                                    id="valorRecebido"
+                                    step="0.01"
+                                    placeholder="R$ 0,00"
+                                    oninput="calcularTroco()"
+                                >
+                            </div>
+
+
+                            <div class="campo">
+                                <label>Troco</label>
+
+                                <input
+                                    type="text"
+                                    id="troco"
+                                    readonly
+                                    value="R$ 0,00"
+                                >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="acoes">
+
+                    <button class="btn btn-secundario" onclick="limparPedido()">
+                        Limpar
+                    </button>
+
+                    <button class="btn btn-principal" onclick="finalizarVenda()">
+                        ✓ Finalizar Venda
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ===================================================== -->
+        <!-- ESTOQUE -->
+        <!-- ===================================================== -->
+
+        <section id="estoque" class="aba">
+
+            <div class="titulo-aba">
+
+                <div>
+                    <h2>Estoque</h2>
+                    <p>Cadastre e controle os produtos da loja</p>
+                </div>
+
+                <button class="btn btn-principal" onclick="abrirCadastroProduto()">
+                    + Novo Produto
+                </button>
+
+            </div>
+
+
+            <!-- CADASTRO PRODUTO -->
+
+            <div id="cadastroProduto" class="card oculto">
+
+                <h3>Cadastrar Produto</h3>
+
+                <div class="grid-4">
+
+                    <div class="campo">
+                        <label>Código</label>
+
+                        <input
+                            type="text"
+                            id="codigoProduto"
+                            placeholder="Ex: 001"
+                        >
+                    </div>
+
+
+                    <div class="campo campo-maior">
+                        <label>Nome do produto</label>
+
+                        <input
+                            type="text"
+                            id="nomeProduto"
+                            placeholder="Ex: Meia de compressão"
+                        >
+                    </div>
+
+
+                    <div class="campo">
+                        <label>Quantidade</label>
+
+                        <input
+                            type="number"
+                            id="quantidadeProduto"
+                            min="0"
+                            value="0"
+                        >
+                    </div>
+
+
+                    <div class="campo">
+                        <label>Preço de venda</label>
+
+                        <input
+                            type="number"
+                            id="precoProduto"
+                            min="0"
+                            step="0.01"
+                            placeholder="R$ 0,00"
+                        >
+                    </div>
+
+                </div>
+
+
+                <div class="acoes">
+
+                    <button
+                        class="btn btn-secundario"
+                        onclick="fecharCadastroProduto()"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        class="btn btn-principal"
+                        onclick="salvarProduto()"
+                    >
+                        Salvar Produto
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- PESQUISA -->
+
+            <div class="card">
+
+                <div class="barra-pesquisa">
+
+                    <input
+                        type="text"
+                        id="pesquisaEstoque"
+                        placeholder="🔎 Pesquisar produto ou código..."
+                        oninput="mostrarEstoque()"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- TABELA -->
+
+            <div class="card tabela-card">
+
+                <div class="tabela-scroll">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Código</th>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Preço</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabelaEstoque"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ===================================================== -->
+        <!-- HISTÓRICO -->
+        <!-- ===================================================== -->
+
+        <section id="historico" class="aba">
+
+            <div class="titulo-aba">
+
+                <div>
+                    <h2>Histórico de Pedidos</h2>
+                    <p>Acompanhe suas vendas e fechamento mensal</p>
+                </div>
+
+            </div>
+
+
+            <div class="card filtros">
+
+                <div class="campo">
+
+                    <label>Mês</label>
+
+                    <select id="mesHistorico" onchange="mostrarHistorico()">
+
+                        <option value="0">Janeiro</option>
+                        <option value="1">Fevereiro</option>
+                        <option value="2">Março</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Maio</option>
+                        <option value="5">Junho</option>
+                        <option value="6">Julho</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Setembro</option>
+                        <option value="9">Outubro</option>
+                        <option value="10">Novembro</option>
+                        <option value="11">Dezembro</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Ano</label>
+
+                    <select id="anoHistorico" onchange="mostrarHistorico()"></select>
+
+                </div>
+
+            </div>
+
+
+            <!-- INDICADORES -->
+
+            <div class="indicadores">
+
+                <div class="indicador">
+
+                    <span>💰</span>
+
+                    <div>
+                        <small>Total vendido</small>
+                        <strong id="totalVendidoMes">R$ 0,00</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="indicador">
+
+                    <span>🛒</span>
+
+                    <div>
+                        <small>Pedidos</small>
+                        <strong id="quantidadePedidosMes">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="indicador">
+
+                    <span>🏆</span>
+
+                    <div>
+                        <small>Produto mais vendido</small>
+                        <strong id="produtoMaisVendido">Nenhum</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="indicador">
+
+                    <span>📅</span>
+
+                    <div>
+                        <small>Status</small>
+                        <strong id="statusMes">Em aberto</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FECHAMENTO -->
+
+            <div class="card fechamento">
+
+                <div>
+
+                    <h3 id="tituloFechamento">
+                        Fechamento do mês
+                    </h3>
+
+                    <p id="textoFechamento">
+                        O mês ainda está aberto.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="btn btn-principal"
+                    onclick="fecharMes()"
+                >
+                    ✓ Fechar Mês
+                </button>
+
+            </div>
+
+
+            <!-- PEDIDOS -->
+
+            <div class="card tabela-card">
+
+                <h3>Pedidos realizados</h3>
+
+                <div class="tabela-scroll">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Código</th>
+                                <th>Pagamento</th>
+                                <th>Total</th>
+                                <th>Ações</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabelaHistorico"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ===================================================== -->
+        <!-- ALUGUÉIS -->
+        <!-- ===================================================== -->
+
+        <section id="alugueis" class="aba">
+
+            <div class="titulo-aba">
+
+                <div>
+                    <h2>Aluguéis</h2>
+                    <p>Controle de produtos e contratos de aluguel</p>
+                </div>
+
+            </div>
+
+
+            <!-- SUBMENU ALUGUEL -->
+
+            <div class="sub-menu">
+
+                <button
+                    class="sub-btn ativo"
+                    onclick="abrirSubAbaAluguel('estoqueAluguel', this)"
+                >
+                    📦 Estoque de Aluguel
+                </button>
+
+                <button
+                    class="sub-btn"
+                    onclick="abrirSubAbaAluguel('novoAluguel', this)"
+                >
+                    + Novo Aluguel
+                </button>
+
+                <button
+                    class="sub-btn"
+                    onclick="abrirSubAbaAluguel('pendentesAluguel', this)"
+                >
+                    📋 Aluguéis Ativos
+                </button>
+
+            </div>
+
+
+
+            <!-- ESTOQUE ALUGUEL -->
+
+            <div id="estoqueAluguel" class="sub-aba aluguel-ativa">
+
+                <div class="titulo-sub">
+
+                    <h3>Produtos disponíveis para aluguel</h3>
+
+                    <button
+                        class="btn btn-principal"
+                        onclick="abrirCadastroAluguel()"
+                    >
+                        + Novo Produto
+                    </button>
+
+                </div>
+
+
+                <div id="cadastroProdutoAluguel" class="card oculto">
+
+                    <h3>Cadastrar produto para aluguel</h3>
+
+                    <div class="grid-4">
+
+                        <div class="campo">
+                            <label>Código</label>
+
+                            <input
+                                type="text"
+                                id="codigoAluguelProduto"
+                                placeholder="Ex: AL001"
+                            >
+                        </div>
+
+
+                        <div class="campo campo-maior">
+
+                            <label>Produto</label>
+
+                            <input
+                                type="text"
+                                id="nomeAluguelProduto"
+                                placeholder="Ex: Cadeira de rodas"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Quantidade</label>
+
+                            <input
+                                type="number"
+                                id="quantidadeAluguelProduto"
+                                min="0"
+                                value="0"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Valor da diária</label>
+
+                            <input
+                                type="number"
+                                id="valorDiariaAluguel"
+                                min="0"
+                                step="0.01"
+                                placeholder="R$ 0,00"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="acoes">
+
+                        <button
+                            class="btn btn-secundario"
+                            onclick="fecharCadastroAluguel()"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            class="btn btn-principal"
+                            onclick="salvarProdutoAluguel()"
+                        >
+                            Salvar
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card tabela-card">
+
+                    <div class="tabela-scroll">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Produto</th>
+                                    <th>Disponível</th>
+                                    <th>Diária</th>
+                                    <th>Ações</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabelaEstoqueAluguel"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- NOVO ALUGUEL -->
+
+            <div id="novoAluguel" class="sub-aba">
+
+                <div class="card">
+
+                    <h3>Novo Aluguel</h3>
+
+                    <div class="grid-2">
+
+                        <div class="campo">
+
+                            <label>Nome do cliente</label>
+
+                            <input
+                                type="text"
+                                id="clienteAluguel"
+                                placeholder="Nome completo"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>CPF</label>
+
+                            <input
+                                type="text"
+                                id="cpfAluguel"
+                                placeholder="CPF"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Telefone</label>
+
+                            <input
+                                type="text"
+                                id="telefoneAluguel"
+                                placeholder="Telefone"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Endereço</label>
+
+                            <input
+                                type="text"
+                                id="enderecoAluguel"
+                                placeholder="Endereço completo"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <h3>Produto do aluguel</h3>
+
+                    <div class="grid-3">
+
+                        <div class="campo">
+
+                            <label>Produto</label>
+
+                            <select
+                                id="produtoAluguel"
+                                onchange="selecionarProdutoAluguel()"
+                            >
+
+                                <option value="">
+                                    Selecione o produto
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Quantidade</label>
+
+                            <input
+                                type="number"
+                                id="quantidadeAluguel"
+                                value="1"
+                                min="1"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Valor da diária</label>
+
+                            <input
+                                type="text"
+                                id="diariaAluguel"
+                                readonly
+                                value="R$ 0,00"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="grid-3">
+
+                        <div class="campo">
+
+                            <label>Data de retirada</label>
+
+                            <input
+                                type="date"
+                                id="dataInicioAluguel"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Quantidade de dias</label>
+
+                            <input
+                                type="number"
+                                id="diasAluguel"
+                                min="1"
+                                value="7"
+                                onchange="calcularAluguel()"
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label>Data de devolução</label>
+
+                            <input
+                                type="date"
+                                id="dataFimAluguel"
+                                readonly
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="resumo-aluguel">
+
+                        <div>
+
+                            <span>Valor estimado</span>
+
+                            <strong id="totalAluguel">
+                                R$ 0,00
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="acoes">
+
+                        <button
+                            class="btn btn-secundario"
+                            onclick="limparAluguel()"
+                        >
+                            Limpar
+                        </button>
+
+                        <button
+                            class="btn btn-principal"
+                            onclick="finalizarAluguel()"
+                        >
+                            ✓ Finalizar Aluguel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ALUGUÉIS ATIVOS -->
+
+            <div id="pendentesAluguel" class="sub-aba">
+
+                <div class="indicadores">
+
+                    <div class="indicador">
+
+                        <span>♿</span>
+
+                        <div>
+
+                            <small>Aluguéis ativos</small>
+
+                            <strong id="totalAlugueisAtivos">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="indicador">
+
+                        <span>⚠️</span>
+
+                        <div>
+
+                            <small>Vencendo hoje</small>
+
+                            <strong id="totalAlugueisHoje">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="indicador">
+
+                        <span>🚨</span>
+
+                        <div>
+
+                            <small>Atrasados</small>
+
+                            <strong id="totalAlugueisAtrasados">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="alertaAlugueis"
+                    class="alerta oculto"
+                ></div>
+
+
+                <div class="card tabela-card">
+
+                    <h3>Aluguéis ativos</h3>
+
+                    <div class="tabela-scroll">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Produto</th>
+                                    <th>Retirada</th>
+                                    <th>Devolução</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="tabelaAlugueis"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+
+    <!-- ===================================================== -->
+    <!-- MODAL -->
+    <!-- ===================================================== -->
+
+    <div id="modal" class="modal">
+
+        <div class="modal-conteudo">
+
+            <button
+                class="fechar-modal"
+                onclick="fecharModal()"
+            >
+                ×
+            </button>
+
+            <div id="conteudoModal"></div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ===================================================== -->
+    <!-- RECIBO PARA IMPRESSÃO -->
+    <!-- ===================================================== -->
+
+    <div id="reciboImpressao" class="recibo">
+
+        <div class="recibo-cabecalho">
+
+            <h1>Ortopédica Alterosa</h1>
+
+            <p>Rua Guarani</p>
+
+            <p>Telefone: ____________________</p>
+
+        </div>
+
+
+        <div class="linha-recibo"></div>
+
+
+        <h2>RECIBO DE VENDA</h2>
+
+
+        <p>
+            <strong>Data:</strong>
+            <span id="reciboData"></span>
+        </p>
+
+
+        <p>
+            <strong>Cliente:</strong>
+            <span id="reciboCliente"></span>
+        </p>
+
+
+        <p>
+            <strong>CPF:</strong>
+            <span id="reciboCPF"></span>
+        </p>
+
+
+        <div class="linha-recibo"></div>
+
+
+        <p>
+            <strong>Produto:</strong>
+            <span id="reciboProduto"></span>
+        </p>
+
+
+        <p>
+            <strong>Código:</strong>
+            <span id="reciboCodigo"></span>
+        </p>
+
+
+        <p>
+            <strong>Quantidade:</strong>
+            <span id="reciboQuantidade"></span>
+        </p>
+
+
+        <p>
+            <strong>Valor:</strong>
+            <span id="reciboValor"></span>
+        </p>
+
+
+        <p>
+            <strong>Pagamento:</strong>
+            <span id="reciboPagamento"></span>
+        </p>
+
+
+        <div class="linha-recibo"></div>
+
+
+        <h3>
+            TOTAL:
+            <span id="reciboTotal"></span>
+        </h3>
+
+
+        <p id="reciboRecebido"></p>
+
+        <p id="reciboTroco"></p>
+
+
+        <div class="assinatura">
+
+            ______________________________________
+
+            <br>
+
+            Ortopédica Alterosa
+
+        </div>
+
+    </div>
+
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
