@@ -1,643 +1,1198 @@
-/* ==========================================================
+/* =====================================================
    ORTOPÉDICA ALTEROSA
-   SISTEMA DE VENDAS, ESTOQUE E ALUGUÉIS
-========================================================== */
+   SISTEMA COMPLETO
+===================================================== */
 
 
-/* ==========================================================
-   DADOS
-========================================================== */
+/* =====================================================
+   CONFIGURAÇÃO DE USUÁRIOS
+===================================================== */
 
-let produtos = JSON.parse(
-    localStorage.getItem("ortopedica_produtos")
-) || [];
+const USUARIOS = [
 
-let pedidos = JSON.parse(
-    localStorage.getItem("ortopedica_pedidos")
-) || [];
+    {
+        usuario: "admin",
+        senha: "admin123",
+        nome: "Administrador",
+        tipo: "admin"
+    },
 
-let produtosAluguel = JSON.parse(
-    localStorage.getItem("ortopedica_produtos_aluguel")
-) || [];
+    {
+        usuario: "funcionario",
+        senha: "func123",
+        nome: "Funcionário",
+        tipo: "funcionario"
+    }
 
-let alugueis = JSON.parse(
-    localStorage.getItem("ortopedica_alugueis")
-) || [];
-
-let mesesFechados = JSON.parse(
-    localStorage.getItem("ortopedica_meses_fechados")
-) || [];
+];
 
 
+/* =====================================================
+   CHAVES DO SISTEMA
+===================================================== */
 
-/* ==========================================================
-   INICIALIZAÇÃO
-========================================================== */
+const CHAVES = {
 
-document.addEventListener("DOMContentLoaded", function () {
+    produtos:
+        "ortopedica_alterosa_produtos",
 
-    atualizarData();
+    vendas:
+        "ortopedica_alterosa_vendas",
 
-    preencherAnos();
+    produtosAluguel:
+        "ortopedica_alterosa_produtos_aluguel",
 
-    definirMesAtual();
+    alugueis:
+        "ortopedica_alterosa_alugueis"
 
-    definirDataAluguel();
+};
+
+
+/* =====================================================
+   VARIÁVEIS
+===================================================== */
+
+let usuarioAtual = null;
+
+
+/* =====================================================
+   ELEMENTOS
+===================================================== */
+
+const telaLogin =
+    document.getElementById("telaLogin");
+
+const sistema =
+    document.getElementById("sistema");
+
+const formLogin =
+    document.getElementById("formLogin");
+
+const usuarioLogin =
+    document.getElementById("usuarioLogin");
+
+const senhaLogin =
+    document.getElementById("senhaLogin");
+
+const mensagemLogin =
+    document.getElementById("mensagemLogin");
+
+const mostrarSenha =
+    document.getElementById("mostrarSenha");
+
+const btnSair =
+    document.getElementById("btnSair");
+
+
+/* =====================================================
+   FUNÇÕES DE LOCALSTORAGE
+===================================================== */
+
+function carregarDados(chave) {
+
+    try {
+
+        const dados =
+            localStorage.getItem(chave);
+
+        if (!dados) {
+            return [];
+        }
+
+        const convertido =
+            JSON.parse(dados);
+
+        return Array.isArray(convertido)
+            ? convertido
+            : [];
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao carregar dados:",
+            erro
+        );
+
+        return [];
+
+    }
+
+}
+
+
+function salvarDados(chave, dados) {
+
+    try {
+
+        localStorage.setItem(
+            chave,
+            JSON.stringify(dados)
+        );
+
+        return true;
+
+    } catch (erro) {
+
+        console.error(
+            "Erro ao salvar dados:",
+            erro
+        );
+
+        alert(
+            "Não foi possível salvar os dados no navegador."
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =====================================================
+   SALVAMENTO DE SEGURANÇA
+===================================================== */
+
+function salvarTodosOsDados() {
+
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
+
+    const vendas =
+        carregarDados(
+            CHAVES.vendas
+        );
+
+    const produtosAluguel =
+        carregarDados(
+            CHAVES.produtosAluguel
+        );
+
+    const alugueis =
+        carregarDados(
+            CHAVES.alugueis
+        );
+
+
+    salvarDados(
+        CHAVES.produtos,
+        produtos
+    );
+
+    salvarDados(
+        CHAVES.vendas,
+        vendas
+    );
+
+    salvarDados(
+        CHAVES.produtosAluguel,
+        produtosAluguel
+    );
+
+    salvarDados(
+        CHAVES.alugueis,
+        alugueis
+    );
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+formLogin.addEventListener(
+    "submit",
+    function (evento) {
+
+        evento.preventDefault();
+
+        const usuario =
+            usuarioLogin.value.trim();
+
+        const senha =
+            senhaLogin.value;
+
+
+        const encontrado =
+            USUARIOS.find(
+                item =>
+                    item.usuario === usuario &&
+                    item.senha === senha
+            );
+
+
+        if (!encontrado) {
+
+            mensagemLogin.textContent =
+                "Usuário ou senha incorretos.";
+
+            senhaLogin.value = "";
+
+            senhaLogin.focus();
+
+            return;
+
+        }
+
+
+        usuarioAtual = encontrado;
+
+
+        sessionStorage.setItem(
+            "ortopedica_usuario",
+            JSON.stringify(encontrado)
+        );
+
+
+        entrarNoSistema();
+
+    }
+);
+
+
+/* =====================================================
+   MOSTRAR / OCULTAR SENHA
+===================================================== */
+
+mostrarSenha.addEventListener(
+    "click",
+    function () {
+
+        if (
+            senhaLogin.type ===
+            "password"
+        ) {
+
+            senhaLogin.type =
+                "text";
+
+            mostrarSenha.textContent =
+                "🙈";
+
+        } else {
+
+            senhaLogin.type =
+                "password";
+
+            mostrarSenha.textContent =
+                "👁";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   ENTRAR
+===================================================== */
+
+function entrarNoSistema() {
+
+    telaLogin.classList.add(
+        "escondido"
+    );
+
+    sistema.classList.remove(
+        "escondido"
+    );
+
+
+    document.getElementById(
+        "nomeUsuarioLogado"
+    ).textContent =
+        usuarioAtual.nome;
+
+
+    document.getElementById(
+        "tipoUsuarioLogado"
+    ).textContent =
+        usuarioAtual.tipo === "admin"
+            ? "Administrador"
+            : "Funcionário";
+
+
+    configurarPermissoes();
+
+
+    carregarProdutos();
+
+    carregarProdutosAluguel();
+
 
     atualizarTudo();
 
-    verificarAlugueisAtrasados();
-
-});
+}
 
 
+/* =====================================================
+   VERIFICAR SESSÃO
+===================================================== */
 
-/* ==========================================================
-   SALVAR DADOS
-========================================================== */
+function verificarSessao() {
 
-function salvarDados() {
+    const salvo =
+        sessionStorage.getItem(
+            "ortopedica_usuario"
+        );
 
-    localStorage.setItem(
-        "ortopedica_produtos",
-        JSON.stringify(produtos)
-    );
 
-    localStorage.setItem(
-        "ortopedica_pedidos",
-        JSON.stringify(pedidos)
-    );
+    if (!salvo) {
 
-    localStorage.setItem(
-        "ortopedica_produtos_aluguel",
-        JSON.stringify(produtosAluguel)
-    );
+        telaLogin.classList.remove(
+            "escondido"
+        );
 
-    localStorage.setItem(
-        "ortopedica_alugueis",
-        JSON.stringify(alugueis)
-    );
+        sistema.classList.add(
+            "escondido"
+        );
 
-    localStorage.setItem(
-        "ortopedica_meses_fechados",
-        JSON.stringify(mesesFechados)
-    );
+        return;
+
+    }
+
+
+    try {
+
+        usuarioAtual =
+            JSON.parse(salvo);
+
+        entrarNoSistema();
+
+    } catch {
+
+        sessionStorage.removeItem(
+            "ortopedica_usuario"
+        );
+
+    }
 
 }
 
 
+/* =====================================================
+   SAIR
+===================================================== */
 
-/* ==========================================================
-   DATA
-========================================================== */
+btnSair.addEventListener(
+    "click",
+    function () {
 
-function atualizarData() {
+        salvarTodosOsDados();
 
-    const elemento = document.getElementById("dataAtual");
 
-    if (!elemento) return;
+        const confirmar =
+            confirm(
+                "Deseja realmente sair do sistema?"
+            );
 
-    const agora = new Date();
 
-    elemento.textContent = agora.toLocaleDateString(
-        "pt-BR",
-        {
-            weekday: "long",
-            day: "2-digit",
-            month: "long",
-            year: "numeric"
+        if (!confirmar) {
+            return;
+        }
+
+
+        usuarioAtual = null;
+
+
+        sessionStorage.removeItem(
+            "ortopedica_usuario"
+        );
+
+
+        sistema.classList.add(
+            "escondido"
+        );
+
+
+        telaLogin.classList.remove(
+            "escondido"
+        );
+
+
+        usuarioLogin.value = "";
+
+        senhaLogin.value = "";
+
+        mensagemLogin.textContent = "";
+
+    }
+);
+
+
+/* =====================================================
+   PERMISSÕES
+===================================================== */
+
+function configurarPermissoes() {
+
+    const admin =
+        usuarioAtual &&
+        usuarioAtual.tipo === "admin";
+
+
+    const menuEstoque =
+        document.getElementById(
+            "menuEstoque"
+        );
+
+    const menuHistorico =
+        document.getElementById(
+            "menuHistorico"
+        );
+
+
+    if (admin) {
+
+        menuEstoque.classList.remove(
+            "escondido"
+        );
+
+        menuHistorico.classList.remove(
+            "escondido"
+        );
+
+
+        document
+            .querySelectorAll(
+                ".admin-aluguel"
+            )
+            .forEach(
+                elemento =>
+                    elemento.classList.remove(
+                        "escondido"
+                    )
+            );
+
+    } else {
+
+        menuEstoque.classList.add(
+            "escondido"
+        );
+
+        menuHistorico.classList.add(
+            "escondido"
+        );
+
+
+        document
+            .querySelectorAll(
+                ".admin-aluguel"
+            )
+            .forEach(
+                elemento =>
+                    elemento.classList.add(
+                        "escondido"
+                    )
+            );
+
+    }
+
+}
+
+
+/* =====================================================
+   MENU PRINCIPAL
+===================================================== */
+
+document
+    .querySelectorAll(".menu-btn")
+    .forEach(
+        botao => {
+
+            botao.addEventListener(
+                "click",
+                function () {
+
+                    const aba =
+                        this.dataset.aba;
+
+
+                    if (
+                        usuarioAtual.tipo ===
+                            "funcionario" &&
+                        (
+                            aba === "estoque" ||
+                            aba === "historico"
+                        )
+                    ) {
+
+                        alert(
+                            "Você não possui permissão para acessar esta área."
+                        );
+
+                        return;
+
+                    }
+
+
+                    document
+                        .querySelectorAll(
+                            ".menu-btn"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "ativo"
+                                )
+                        );
+
+
+                    document
+                        .querySelectorAll(
+                            ".aba"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "ativa"
+                                )
+                        );
+
+
+                    this.classList.add(
+                        "ativo"
+                    );
+
+
+                    const elemento =
+                        document.getElementById(
+                            "aba-" + aba
+                        );
+
+
+                    if (elemento) {
+
+                        elemento.classList.add(
+                            "ativa"
+                        );
+
+                    }
+
+
+                    atualizarTudo();
+
+                }
+
+            );
+
         }
     );
 
-}
 
-
-
-function preencherAnos() {
-
-    const select = document.getElementById("anoHistorico");
-
-    if (!select) return;
-
-    const anoAtual = new Date().getFullYear();
-
-    select.innerHTML = "";
-
-    for (
-        let ano = anoAtual - 5;
-        ano <= anoAtual + 5;
-        ano++
-    ) {
-
-        const option = document.createElement("option");
-
-        option.value = ano;
-
-        option.textContent = ano;
-
-        if (ano === anoAtual) {
-            option.selected = true;
-        }
-
-        select.appendChild(option);
-
-    }
-
-}
-
-
-
-function definirMesAtual() {
-
-    const mes = document.getElementById("mesHistorico");
-
-    if (!mes) return;
-
-    mes.value = new Date().getMonth();
-
-}
-
-
-
-/* ==========================================================
-   ABAS PRINCIPAIS
-========================================================== */
-
-function abrirAba(id, botao) {
-
-    document.querySelectorAll(".aba").forEach(
-        aba => aba.classList.remove("ativa")
-    );
-
-    const aba = document.getElementById(id);
-
-    if (aba) {
-        aba.classList.add("ativa");
-    }
-
-
-    document.querySelectorAll(".menu-btn").forEach(
-        btn => btn.classList.remove("ativo")
-    );
-
-    if (botao) {
-        botao.classList.add("ativo");
-    }
-
-
-    if (id === "estoque") {
-        mostrarEstoque();
-    }
-
-    if (id === "historico") {
-        mostrarHistorico();
-    }
-
-    if (id === "alugueis") {
-        mostrarEstoqueAluguel();
-        atualizarSelectAluguel();
-        mostrarAlugueis();
-        verificarAlugueisAtrasados();
-    }
-
-}
-
-
-
-/* ==========================================================
+/* =====================================================
    PRODUTOS
-========================================================== */
+===================================================== */
 
-function abrirCadastroProduto() {
+function carregarProdutos() {
 
-    document
-        .getElementById("cadastroProduto")
-        .classList.remove("oculto");
-
-}
-
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
 
 
-function fecharCadastroProduto() {
-
-    document
-        .getElementById("cadastroProduto")
-        .classList.add("oculto");
-
-}
+    const select =
+        document.getElementById(
+            "produtoVenda"
+        );
 
 
-
-function salvarProduto() {
-
-    const codigo =
-        document.getElementById("codigoProduto").value.trim();
-
-    const nome =
-        document.getElementById("nomeProduto").value.trim();
-
-    const quantidade =
-        Number(document.getElementById("quantidadeProduto").value);
-
-    const preco =
-        Number(document.getElementById("precoProduto").value);
-
-
-    if (!codigo || !nome) {
-
-        alert("Informe o código e o nome do produto.");
-
+    if (!select) {
         return;
     }
 
 
-    if (quantidade < 0 || preco < 0) {
-
-        alert("Quantidade e preço não podem ser negativos.");
-
-        return;
-    }
+    select.innerHTML =
+        '<option value="">Selecione um produto</option>';
 
 
-    const codigoExiste = produtos.some(
-        produto => produto.codigo.toLowerCase() === codigo.toLowerCase()
+    produtos.forEach(
+        produto => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                produto.id;
+
+
+            option.textContent =
+                `${produto.code} - ${produto.name} | ${formatarMoeda(produto.price)} | Estoque: ${produto.quantity}`;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
     );
 
 
-    if (codigoExiste) {
-
-        alert("Já existe um produto com este código.");
-
-        return;
-    }
-
-
-    const produto = {
-
-        id: Date.now(),
-
-        codigo: codigo,
-
-        nome: nome,
-
-        quantidade: quantidade,
-
-        preco: preco,
-
-        criadoEm: new Date().toISOString()
-
-    };
-
-
-    produtos.push(produto);
-
-    salvarDados();
-
-    limparFormularioProduto();
-
-    fecharCadastroProduto();
-
-    atualizarTudo();
-
-    alert("Produto cadastrado com sucesso!");
+    renderizarEstoque();
 
 }
 
 
+/* =====================================================
+   CADASTRAR PRODUTO
+===================================================== */
 
-function limparFormularioProduto() {
+document
+    .getElementById(
+        "formProduto"
+    )
+    .addEventListener(
+        "submit",
+        function (evento) {
 
-    document.getElementById("codigoProduto").value = "";
-
-    document.getElementById("nomeProduto").value = "";
-
-    document.getElementById("quantidadeProduto").value = 0;
-
-    document.getElementById("precoProduto").value = "";
-
-}
+            evento.preventDefault();
 
 
+            if (
+                !usuarioAtual ||
+                usuarioAtual.tipo !== "admin"
+            ) {
 
-/* ==========================================================
-   ESTOQUE
-========================================================== */
+                alert(
+                    "Somente o administrador pode cadastrar produtos."
+                );
 
-function mostrarEstoque() {
+                return;
+
+            }
+
+
+            const produtos =
+                carregarDados(
+                    CHAVES.produtos
+                );
+
+
+            const codigo =
+                document
+                    .getElementById(
+                        "codigoProduto"
+                    )
+                    .value.trim();
+
+
+            const nome =
+                document
+                    .getElementById(
+                        "nomeProduto"
+                    )
+                    .value.trim();
+
+
+            const quantidade =
+                Number(
+                    document
+                        .getElementById(
+                            "quantidadeProduto"
+                        )
+                        .value
+                );
+
+
+            const preco =
+                Number(
+                    document
+                        .getElementById(
+                            "precoProduto"
+                        )
+                        .value
+                );
+
+
+            if (
+                produtos.some(
+                    produto =>
+                        produto.code.toLowerCase() ===
+                        codigo.toLowerCase()
+                )
+            ) {
+
+                alert(
+                    "Já existe um produto com este código."
+                );
+
+                return;
+
+            }
+
+
+            produtos.push({
+
+                id:
+                    Date.now(),
+
+                code:
+                    codigo,
+
+                name:
+                    nome,
+
+                quantity:
+                    quantidade,
+
+                price:
+                    preco
+
+            });
+
+
+            salvarDados(
+                CHAVES.produtos,
+                produtos
+            );
+
+
+            this.reset();
+
+
+            alert(
+                "Produto cadastrado com sucesso!"
+            );
+
+
+            carregarProdutos();
+
+            atualizarTudo();
+
+        }
+    );
+
+
+/* =====================================================
+   RENDERIZAR ESTOQUE
+===================================================== */
+
+function renderizarEstoque(
+    termo = ""
+) {
+
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
+
 
     const tabela =
-        document.getElementById("tabelaEstoque");
-
-    const pesquisa =
-        document.getElementById("pesquisaEstoque")
-            ?.value
-            .toLowerCase()
-            .trim() || "";
+        document.getElementById(
+            "tabelaEstoque"
+        );
 
 
     tabela.innerHTML = "";
 
 
-    const lista = produtos.filter(produto => {
+    const filtrados =
+        produtos.filter(
+            produto => {
 
-        return (
-            produto.nome.toLowerCase().includes(pesquisa) ||
-            produto.codigo.toLowerCase().includes(pesquisa)
+                const texto =
+                    (
+                        produto.code +
+                        " " +
+                        produto.name
+                    ).toLowerCase();
+
+
+                return texto.includes(
+                    termo.toLowerCase()
+                );
+
+            }
         );
 
-    });
 
-
-    if (lista.length === 0) {
+    if (!filtrados.length) {
 
         tabela.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center;">
-                    Nenhum produto cadastrado.
+                <td colspan="5">
+                    Nenhum produto encontrado.
                 </td>
             </tr>
         `;
 
         return;
+
     }
 
 
-    lista.forEach(produto => {
+    filtrados.forEach(
+        produto => {
 
-        let status = "";
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
-        if (produto.quantidade <= 0) {
 
-            status =
-                `<span class="status status-esgotado">
-                    Esgotado
-                </span>`;
+            tr.innerHTML = `
 
-        } else if (produto.quantidade <= 3) {
+                <td>
+                    ${escaparHTML(
+                        produto.code
+                    )}
+                </td>
 
-            status =
-                `<span class="status status-baixo">
-                    Estoque baixo
-                </span>`;
+                <td>
+                    ${escaparHTML(
+                        produto.name
+                    )}
+                </td>
 
-        } else {
+                <td>
+                    <strong>
+                        ${produto.quantity}
+                    </strong>
+                </td>
 
-            status =
-                `<span class="status status-ok">
-                    Disponível
-                </span>`;
+                <td>
+                    ${formatarMoeda(
+                        produto.price
+                    )}
+                </td>
+
+                <td>
+
+                    <div class="acao-tabela">
+
+                        <button
+                            class="btn-mini btn-editar"
+                            onclick="adicionarEstoque(${produto.id})"
+                        >
+                            + Estoque
+                        </button>
+
+                        <button
+                            class="btn-mini btn-excluir"
+                            onclick="excluirProduto(${produto.id})"
+                        >
+                            Excluir
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            tabela.appendChild(
+                tr
+            );
 
         }
-
-
-        tabela.innerHTML += `
-
-            <tr>
-
-                <td>
-                    <strong>${escaparHTML(produto.codigo)}</strong>
-                </td>
-
-                <td>
-                    ${escaparHTML(produto.nome)}
-                </td>
-
-                <td>
-                    <strong>${produto.quantidade}</strong>
-                </td>
-
-                <td>
-                    ${formatarMoeda(produto.preco)}
-                </td>
-
-                <td>
-                    ${status}
-                </td>
-
-                <td>
-
-                    <button
-                        class="btn btn-pequeno btn-principal"
-                        onclick="alterarEstoque(${produto.id})"
-                    >
-                        Alterar
-                    </button>
-
-                    <button
-                        class="btn btn-pequeno btn-perigo"
-                        onclick="excluirProduto(${produto.id})"
-                    >
-                        Excluir
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
+    );
 
 }
 
 
+/* =====================================================
+   ADICIONAR ESTOQUE
+===================================================== */
 
-/* ==========================================================
-   ALTERAR ESTOQUE
-========================================================== */
+function adicionarEstoque(
+    id
+) {
 
-function alterarEstoque(id) {
+    if (
+        !usuarioAtual ||
+        usuarioAtual.tipo !== "admin"
+    ) {
 
-    const produto = produtos.find(
-        item => item.id === id
-    );
+        alert(
+            "Somente o administrador pode alterar o estoque."
+        );
 
-    if (!produto) return;
+        return;
 
-
-    const novaQuantidade = prompt(
-        `Quantidade atual: ${produto.quantidade}\n\nDigite a nova quantidade:`,
-        produto.quantidade
-    );
-
-
-    if (novaQuantidade === null) return;
-
-
-    const valor = Number(novaQuantidade);
+    }
 
 
-    if (!Number.isInteger(valor) || valor < 0) {
+    const quantidade =
+        prompt(
+            "Digite a quantidade que chegou:"
+        );
 
-        alert("Digite uma quantidade inteira válida.");
 
+    if (quantidade === null) {
         return;
     }
 
 
-    produto.quantidade = valor;
-
-    salvarDados();
-
-    atualizarTudo();
-
-}
-
-
-
-function excluirProduto(id) {
-
-    const produto = produtos.find(
-        item => item.id === id
-    );
-
-    if (!produto) return;
-
-
-    const confirmar = confirm(
-        `Deseja realmente excluir "${produto.nome}"?`
-    );
-
-
-    if (!confirmar) return;
-
-
-    produtos = produtos.filter(
-        item => item.id !== id
-    );
-
-
-    salvarDados();
-
-    atualizarTudo();
-
-}
-
-
-
-/* ==========================================================
-   PEDIDO
-========================================================== */
-
-function atualizarSelectProdutos() {
-
-    const select =
-        document.getElementById("produtoVenda");
-
-    if (!select) return;
-
-
-    const valorAtual = select.value;
-
-
-    select.innerHTML = `
-        <option value="">
-            Selecione um produto
-        </option>
-    `;
-
-
-    produtos
-        .filter(produto => produto.quantidade > 0)
-        .forEach(produto => {
-
-            const option =
-                document.createElement("option");
-
-            option.value = produto.id;
-
-            option.textContent =
-                `${produto.nome} — ${formatarMoeda(produto.preco)} — Estoque: ${produto.quantidade}`;
-
-            select.appendChild(option);
-
-        });
+    const valor =
+        Number(
+            quantidade
+        );
 
 
     if (
-        produtos.some(
-            produto => String(produto.id) === String(valorAtual)
-        )
+        !Number.isFinite(valor) ||
+        valor <= 0
     ) {
 
-        select.value = valorAtual;
+        alert(
+            "Digite uma quantidade válida."
+        );
+
+        return;
 
     }
 
-}
 
-
-
-function selecionarProdutoVenda() {
-
-    const id =
-        Number(
-            document.getElementById("produtoVenda").value
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
         );
 
 
     const produto =
         produtos.find(
-            item => item.id === id
+            item =>
+                item.id === id
         );
 
 
-    const codigo =
-        document.getElementById("codigoVenda");
-
-    const preco =
-        document.getElementById("precoVenda");
-
-
     if (!produto) {
-
-        codigo.value = "";
-
-        preco.value = "";
-
-        calcularVenda();
-
         return;
     }
 
 
-    codigo.value = produto.codigo;
+    produto.quantity += valor;
 
-    preco.value = produto.preco;
 
-    calcularVenda();
+    salvarDados(
+        CHAVES.produtos,
+        produtos
+    );
+
+
+    carregarProdutos();
+
+
+    alert(
+        "Estoque atualizado!"
+    );
 
 }
 
 
+/* =====================================================
+   EXCLUIR PRODUTO
+===================================================== */
 
-function calcularVenda() {
+function excluirProduto(
+    id
+) {
 
-    const preco =
-        Number(
-            document.getElementById("precoVenda").value
-        ) || 0;
+    if (
+        !usuarioAtual ||
+        usuarioAtual.tipo !== "admin"
+    ) {
+
+        alert(
+            "Somente o administrador pode excluir produtos."
+        );
+
+        return;
+
+    }
+
+
+    const confirmar =
+        confirm(
+            "Deseja realmente excluir este produto?"
+        );
+
+
+    if (!confirmar) {
+        return;
+    }
+
+
+    let produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
+
+
+    produtos =
+        produtos.filter(
+            produto =>
+                produto.id !== id
+        );
+
+
+    salvarDados(
+        CHAVES.produtos,
+        produtos
+    );
+
+
+    carregarProdutos();
+
+}
+
+
+/* =====================================================
+   BUSCA ESTOQUE
+===================================================== */
+
+document
+    .getElementById(
+        "buscaEstoque"
+    )
+    .addEventListener(
+        "input",
+        function () {
+
+            renderizarEstoque(
+                this.value
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   VENDA
+===================================================== */
+
+const produtoVenda =
+    document.getElementById(
+        "produtoVenda"
+    );
+
+const quantidadeVenda =
+    document.getElementById(
+        "quantidadeVenda"
+    );
+
+const precoVenda =
+    document.getElementById(
+        "precoVenda"
+    );
+
+const totalVenda =
+    document.getElementById(
+        "totalVenda"
+    );
+
+const valorRecebido =
+    document.getElementById(
+        "valorRecebido"
+    );
+
+const trocoVenda =
+    document.getElementById(
+        "trocoVenda"
+    );
+
+const areaDinheiro =
+    document.getElementById(
+        "areaDinheiro"
+    );
+
+
+produtoVenda.addEventListener(
+    "change",
+    atualizarVenda
+);
+
+
+quantidadeVenda.addEventListener(
+    "input",
+    atualizarVenda
+);
+
+
+document
+    .querySelectorAll(
+        'input[name="pagamento"]'
+    )
+    .forEach(
+        radio => {
+
+            radio.addEventListener(
+                "change",
+                atualizarPagamento
+            );
+
+        }
+    );
+
+
+valorRecebido.addEventListener(
+    "input",
+    calcularTroco
+);
+
+
+/* =====================================================
+   ATUALIZAR VENDA
+===================================================== */
+
+function atualizarVenda() {
+
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
+
+
+    const produto =
+        produtos.find(
+            item =>
+                String(item.id) ===
+                String(
+                    produtoVenda.value
+                )
+        );
 
 
     const quantidade =
         Number(
-            document.getElementById("quantidadeVenda").value
+            quantidadeVenda.value
         ) || 0;
 
 
-    const total = preco * quantidade;
+    if (!produto) {
+
+        precoVenda.value =
+            "R$ 0,00";
+
+        totalVenda.value =
+            "R$ 0,00";
+
+        calcularTroco();
+
+        return;
+
+    }
 
 
-    document.getElementById("totalProdutoVenda")
-        .value = formatarMoeda(total);
+    precoVenda.value =
+        formatarMoeda(
+            produto.price
+        );
 
 
-    document.getElementById("subtotalVenda")
-        .textContent = formatarMoeda(total);
-
-
-    document.getElementById("totalVenda")
-        .textContent = formatarMoeda(total);
+    totalVenda.value =
+        formatarMoeda(
+            produto.price *
+            quantidade
+        );
 
 
     calcularTroco();
@@ -645,30 +1200,49 @@ function calcularVenda() {
 }
 
 
+/* =====================================================
+   PAGAMENTO
+===================================================== */
 
-function alterarPagamento() {
+function obterPagamento() {
+
+    const selecionado =
+        document.querySelector(
+            'input[name="pagamento"]:checked'
+        );
+
+
+    return selecionado
+        ? selecionado.value
+        : "Pix";
+
+}
+
+
+function atualizarPagamento() {
 
     const pagamento =
-        document.querySelector(
-            'input[name="formaPagamento"]:checked'
-        )?.value;
+        obterPagamento();
 
 
-    const area =
-        document.getElementById("areaDinheiro");
+    if (
+        pagamento ===
+        "Dinheiro"
+    ) {
 
-
-    if (pagamento === "Dinheiro") {
-
-        area.classList.remove("oculto");
+        areaDinheiro.classList.remove(
+            "escondido"
+        );
 
     } else {
 
-        area.classList.add("oculto");
+        areaDinheiro.classList.add(
+            "escondido"
+        );
 
-        document.getElementById("valorRecebido").value = "";
+        valorRecebido.value = "";
 
-        document.getElementById("troco").value =
+        trocoVenda.value =
             "R$ 0,00";
 
     }
@@ -676,788 +1250,968 @@ function alterarPagamento() {
 }
 
 
+/* =====================================================
+   TROCO
+===================================================== */
 
 function calcularTroco() {
 
-    const forma =
-        document.querySelector(
-            'input[name="formaPagamento"]:checked'
-        )?.value;
+    const pagamento =
+        obterPagamento();
 
 
-    if (forma !== "Dinheiro") return;
+    if (
+        pagamento !==
+        "Dinheiro"
+    ) {
+
+        trocoVenda.value =
+            "R$ 0,00";
+
+        return;
+
+    }
 
 
     const total =
-        Number(
-            document.getElementById("precoVenda").value
-        ) *
-        Number(
-            document.getElementById("quantidadeVenda").value
-        );
+        obterTotalVenda();
 
 
     const recebido =
         Number(
-            document.getElementById("valorRecebido").value
+            valorRecebido.value
         ) || 0;
 
 
-    const troco = recebido - total;
+    const troco =
+        recebido -
+        total;
 
 
-    document.getElementById("troco").value =
+    trocoVenda.value =
         formatarMoeda(
-            troco > 0 ? troco : 0
+            troco > 0
+                ? troco
+                : 0
         );
 
 }
 
 
+/* =====================================================
+   OBTER TOTAL
+===================================================== */
 
-function finalizarVenda() {
+function obterTotalVenda() {
 
-    const cliente =
-        document.getElementById("clienteVenda").value.trim();
-
-
-    const cpf =
-        document.getElementById("cpfVenda").value.trim();
+    const produtos =
+        carregarDados(
+            CHAVES.produtos
+        );
 
 
-    const produtoId =
-        Number(
-            document.getElementById("produtoVenda").value
+    const produto =
+        produtos.find(
+            item =>
+                String(item.id) ===
+                String(
+                    produtoVenda.value
+                )
         );
 
 
     const quantidade =
         Number(
-            document.getElementById("quantidadeVenda").value
-        );
-
-
-    const formaPagamento =
-        document.querySelector(
-            'input[name="formaPagamento"]:checked'
-        )?.value;
-
-
-    if (!cliente) {
-
-        alert("Informe o nome do cliente.");
-
-        return;
-    }
-
-
-    if (!produtoId) {
-
-        alert("Selecione um produto.");
-
-        return;
-    }
-
-
-    if (!quantidade || quantidade <= 0) {
-
-        alert("Informe uma quantidade válida.");
-
-        return;
-    }
-
-
-    if (!formaPagamento) {
-
-        alert("Selecione a forma de pagamento.");
-
-        return;
-    }
-
-
-    const produto =
-        produtos.find(
-            item => item.id === produtoId
-        );
+            quantidadeVenda.value
+        ) || 0;
 
 
     if (!produto) {
-
-        alert("Produto não encontrado.");
-
-        return;
+        return 0;
     }
 
 
-    if (produto.quantidade < quantidade) {
+    return produto.price *
+        quantidade;
 
-        alert(
-            `Estoque insuficiente.\n\nDisponível: ${produto.quantidade}`
-        );
-
-        return;
-    }
+}
 
 
-    const total =
-        produto.preco * quantidade;
+/* =====================================================
+   FINALIZAR VENDA
+===================================================== */
+
+document
+    .getElementById(
+        "formVenda"
+    )
+    .addEventListener(
+        "submit",
+        function (evento) {
+
+            evento.preventDefault();
 
 
-    let recebido = total;
-
-    let troco = 0;
-
-
-    if (formaPagamento === "Dinheiro") {
-
-        recebido =
-            Number(
-                document.getElementById("valorRecebido").value
-            ) || 0;
+            const produtos =
+                carregarDados(
+                    CHAVES.produtos
+                );
 
 
-        if (recebido < total) {
+            const produto =
+                produtos.find(
+                    item =>
+                        String(item.id) ===
+                        String(
+                            produtoVenda.value
+                        )
+                );
 
-            alert(
-                "O valor recebido é menor que o valor da venda."
+
+            if (!produto) {
+
+                alert(
+                    "Selecione um produto."
+                );
+
+                return;
+
+            }
+
+
+            const quantidade =
+                Number(
+                    quantidadeVenda.value
+                );
+
+
+            if (
+                quantidade <= 0 ||
+                !Number.isInteger(
+                    quantidade
+                )
+            ) {
+
+                alert(
+                    "Digite uma quantidade válida."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                quantidade >
+                produto.quantity
+            ) {
+
+                alert(
+                    `Estoque insuficiente. Disponível: ${produto.quantity}`
+                );
+
+                return;
+
+            }
+
+
+            const total =
+                produto.price *
+                quantidade;
+
+
+            const pagamento =
+                obterPagamento();
+
+
+            let recebido = 0;
+
+            let troco = 0;
+
+
+            if (
+                pagamento ===
+                "Dinheiro"
+            ) {
+
+                recebido =
+                    Number(
+                        valorRecebido.value
+                    ) || 0;
+
+
+                if (
+                    recebido < total
+                ) {
+
+                    alert(
+                        "O valor recebido é menor que o total da venda."
+                    );
+
+                    return;
+
+                }
+
+
+                troco =
+                    recebido -
+                    total;
+
+            }
+
+
+            /* =============================================
+               DIMINUI ESTOQUE
+            ============================================= */
+
+            produto.quantity -=
+                quantidade;
+
+
+            const estoqueSalvo =
+                salvarDados(
+                    CHAVES.produtos,
+                    produtos
+                );
+
+
+            if (!estoqueSalvo) {
+
+                return;
+
+            }
+
+
+            /* =============================================
+               CRIA VENDA
+            ============================================= */
+
+            const vendas =
+                carregarDados(
+                    CHAVES.vendas
+                );
+
+
+            const venda = {
+
+                id:
+                    Date.now(),
+
+                date:
+                    new Date().toISOString(),
+
+                customer:
+                    document
+                        .getElementById(
+                            "clienteVenda"
+                        )
+                        .value.trim(),
+
+                productId:
+                    produto.id,
+
+                productCode:
+                    produto.code,
+
+                productName:
+                    produto.name,
+
+                quantity:
+                    quantidade,
+
+                unitPrice:
+                    produto.price,
+
+                total:
+                    total,
+
+                payment:
+                    pagamento,
+
+                cashReceived:
+                    recebido,
+
+                change:
+                    troco,
+
+                impresso:
+                    false,
+
+                impressoEm:
+                    null
+
+            };
+
+
+            vendas.push(
+                venda
             );
 
-            return;
+
+            /* =============================================
+               SALVA A VENDA ANTES DA IMPRESSÃO
+            ============================================= */
+
+            const vendaSalva =
+                salvarDados(
+                    CHAVES.vendas,
+                    vendas
+                );
+
+
+            if (!vendaSalva) {
+
+                return;
+
+            }
+
+
+            prepararRecibo(
+                venda
+            );
+
+
+            alert(
+                "Venda realizada com sucesso!"
+            );
+
+
+            carregarProdutos();
+
+            atualizarTudo();
+
+
+            this.reset();
+
+
+            document
+                .querySelector(
+                    'input[value="Pix"]'
+                )
+                .checked = true;
+
+
+            atualizarPagamento();
+
+            atualizarVenda();
+
+
+            /* =============================================
+               IMPRESSÃO
+            ============================================= */
+
+            setTimeout(
+                function () {
+
+                    window.print();
+
+
+                    registrarImpressaoVenda(
+                        venda.id
+                    );
+
+                },
+                300
+            );
+
         }
-
-
-        troco = recebido - total;
-
-    }
-
-
-    /* BAIXA DO ESTOQUE */
-
-    produto.quantidade -= quantidade;
-
-
-    /* REGISTRA PEDIDO */
-
-    const pedido = {
-
-        id: Date.now(),
-
-        cliente: cliente,
-
-        cpf: cpf,
-
-        produtoId: produto.id,
-
-        produto: produto.nome,
-
-        codigo: produto.codigo,
-
-        quantidade: quantidade,
-
-        precoUnitario: produto.preco,
-
-        total: total,
-
-        formaPagamento: formaPagamento,
-
-        recebido: recebido,
-
-        troco: troco,
-
-        data: new Date().toISOString(),
-
-        mes: new Date().getMonth(),
-
-        ano: new Date().getFullYear()
-
-    };
-
-
-    pedidos.push(pedido);
-
-    salvarDados();
-
-    prepararRecibo(pedido);
-
-    atualizarTudo();
-
-    limparPedido();
-
-
-    /*
-       Abre automaticamente a tela de impressão
-    */
-
-    setTimeout(() => {
-
-        window.print();
-
-    }, 300);
-
-}
-
-
-
-/* ==========================================================
-   RECIBO
-========================================================== */
-
-function prepararRecibo(pedido) {
-
-    document.getElementById("reciboData")
-        .textContent =
-        formatarDataHora(pedido.data);
-
-
-    document.getElementById("reciboCliente")
-        .textContent =
-        pedido.cliente;
-
-
-    document.getElementById("reciboCPF")
-        .textContent =
-        pedido.cpf || "Não informado";
-
-
-    document.getElementById("reciboProduto")
-        .textContent =
-        pedido.produto;
-
-
-    document.getElementById("reciboCodigo")
-        .textContent =
-        pedido.codigo;
-
-
-    document.getElementById("reciboQuantidade")
-        .textContent =
-        pedido.quantidade;
-
-
-    document.getElementById("reciboValor")
-        .textContent =
-        formatarMoeda(pedido.precoUnitario);
-
-
-    document.getElementById("reciboPagamento")
-        .textContent =
-        pedido.formaPagamento;
-
-
-    document.getElementById("reciboTotal")
-        .textContent =
-        formatarMoeda(pedido.total);
-
-
-    const recebido =
-        document.getElementById("reciboRecebido");
-
-    const troco =
-        document.getElementById("reciboTroco");
-
-
-    if (pedido.formaPagamento === "Dinheiro") {
-
-        recebido.textContent =
-            "Valor recebido: " +
-            formatarMoeda(pedido.recebido);
-
-
-        troco.textContent =
-            "Troco: " +
-            formatarMoeda(pedido.troco);
-
-    } else {
-
-        recebido.textContent = "";
-
-        troco.textContent = "";
-
-    }
-
-}
-
-
-
-/* ==========================================================
-   LIMPAR PEDIDO
-========================================================== */
-
-function limparPedido() {
-
-    document.getElementById("clienteVenda").value = "";
-
-    document.getElementById("cpfVenda").value = "";
-
-    document.getElementById("produtoVenda").value = "";
-
-    document.getElementById("codigoVenda").value = "";
-
-    document.getElementById("precoVenda").value = "";
-
-    document.getElementById("quantidadeVenda").value = 1;
-
-    document.getElementById("totalProdutoVenda").value =
-        "R$ 0,00";
-
-    document.getElementById("subtotalVenda").textContent =
-        "R$ 0,00";
-
-    document.getElementById("totalVenda").textContent =
-        "R$ 0,00";
-
-    document.getElementById("valorRecebido").value = "";
-
-    document.getElementById("troco").value =
-        "R$ 0,00";
-
-
-    document.querySelectorAll(
-        'input[name="formaPagamento"]'
-    ).forEach(
-        radio => radio.checked = false
     );
 
 
-    document
-        .getElementById("areaDinheiro")
-        .classList.add("oculto");
+/* =====================================================
+   REGISTRAR IMPRESSÃO
+===================================================== */
+
+function registrarImpressaoVenda(
+    idVenda
+) {
+
+    const vendas =
+        carregarDados(
+            CHAVES.vendas
+        );
+
+
+    const venda =
+        vendas.find(
+            item =>
+                item.id === idVenda
+        );
+
+
+    if (!venda) {
+        return;
+    }
+
+
+    venda.impresso =
+        true;
+
+
+    venda.impressoEm =
+        new Date().toISOString();
+
+
+    salvarDados(
+        CHAVES.vendas,
+        vendas
+    );
 
 }
 
 
+/* =====================================================
+   RECIBO
+===================================================== */
 
-/* ==========================================================
+function prepararRecibo(
+    venda
+) {
+
+    const data =
+        new Date(
+            venda.date
+        );
+
+
+    const html = `
+
+        <p>
+            <strong>Cliente:</strong>
+            ${escaparHTML(
+                venda.customer
+            )}
+        </p>
+
+        <p>
+            <strong>Data:</strong>
+            ${formatarData(data)}
+        </p>
+
+        <br>
+
+        <p>
+            <strong>Produto:</strong>
+            ${escaparHTML(
+                venda.productName
+            )}
+        </p>
+
+        <p>
+            <strong>Quantidade:</strong>
+            ${venda.quantity}
+        </p>
+
+        <p>
+            <strong>Valor unitário:</strong>
+            ${formatarMoeda(
+                venda.unitPrice
+            )}
+        </p>
+
+        <br>
+
+        <p>
+            <strong>Pagamento:</strong>
+            ${escaparHTML(
+                venda.payment
+            )}
+        </p>
+
+        ${
+            venda.payment ===
+            "Dinheiro"
+                ? `
+
+                    <p>
+                        <strong>Recebido:</strong>
+                        ${formatarMoeda(
+                            venda.cashReceived
+                        )}
+                    </p>
+
+                    <p>
+                        <strong>Troco:</strong>
+                        ${formatarMoeda(
+                            venda.change
+                        )}
+                    </p>
+
+                `
+                : ""
+        }
+
+        <br>
+
+        <h2>
+            TOTAL:
+            ${formatarMoeda(
+                venda.total
+            )}
+        </h2>
+
+    `;
+
+
+    document.getElementById(
+        "conteudoRecibo"
+    ).innerHTML =
+        html;
+
+}
+
+
+/* =====================================================
    HISTÓRICO
-========================================================== */
+===================================================== */
 
-function mostrarHistorico() {
+function renderizarHistorico() {
 
-    const mes =
-        Number(
-            document.getElementById("mesHistorico").value
+    const vendas =
+        carregarDados(
+            CHAVES.vendas
         );
-
-
-    const ano =
-        Number(
-            document.getElementById("anoHistorico").value
-        );
-
-
-    const lista =
-        pedidos.filter(
-            pedido =>
-                pedido.mes === mes &&
-                pedido.ano === ano
-        );
-
-
-    const total =
-        lista.reduce(
-            (soma, pedido) =>
-                soma + Number(pedido.total),
-            0
-        );
-
-
-    document.getElementById("totalVendidoMes")
-        .textContent =
-        formatarMoeda(total);
-
-
-    document.getElementById("quantidadePedidosMes")
-        .textContent =
-        lista.length;
-
-
-    const contagem = {};
-
-
-    lista.forEach(pedido => {
-
-        if (!contagem[pedido.produto]) {
-
-            contagem[pedido.produto] = 0;
-
-        }
-
-        contagem[pedido.produto] += pedido.quantidade;
-
-    });
-
-
-    let produtoMais = "Nenhum";
-
-    let maiorQuantidade = 0;
-
-
-    Object.keys(contagem).forEach(nome => {
-
-        if (contagem[nome] > maiorQuantidade) {
-
-            maiorQuantidade = contagem[nome];
-
-            produtoMais = nome;
-
-        }
-
-    });
-
-
-    document.getElementById("produtoMaisVendido")
-        .textContent =
-        produtoMais;
-
-
-    const chaveMes =
-        `${ano}-${String(mes + 1).padStart(2, "0")}`;
-
-
-    const fechado =
-        mesesFechados.includes(chaveMes);
-
-
-    document.getElementById("statusMes")
-        .textContent =
-        fechado ? "Fechado" : "Em aberto";
-
-
-    document.getElementById("tituloFechamento")
-        .textContent =
-        `${nomeMes(mes)} de ${ano}`;
-
-
-    document.getElementById("textoFechamento")
-        .textContent =
-        fechado
-            ? `Mês fechado. Total vendido: ${formatarMoeda(total)}.`
-            : `Mês em aberto. Total até agora: ${formatarMoeda(total)}.`;
 
 
     const tabela =
-        document.getElementById("tabelaHistorico");
+        document.getElementById(
+            "tabelaHistorico"
+        );
+
+
+    const filtro =
+        document.getElementById(
+            "filtroMes"
+        ).value;
 
 
     tabela.innerHTML = "";
 
 
-    if (lista.length === 0) {
+    const filtradas =
+        vendas.filter(
+            venda => {
+
+                if (!filtro) {
+                    return true;
+                }
+
+
+                const data =
+                    new Date(
+                        venda.date
+                    );
+
+
+                const ano =
+                    data.getFullYear();
+
+
+                const mes =
+                    String(
+                        data.getMonth() + 1
+                    ).padStart(
+                        2,
+                        "0"
+                    );
+
+
+                return `${ano}-${mes}` ===
+                    filtro;
+
+            }
+        );
+
+
+    if (!filtradas.length) {
 
         tabela.innerHTML = `
+
             <tr>
-                <td colspan="7" style="text-align:center;">
-                    Nenhum pedido neste mês.
+
+                <td colspan="6">
+                    Nenhuma venda encontrada.
                 </td>
+
             </tr>
+
         `;
 
+
+        atualizarIndicadores(
+            filtradas
+        );
+
+
         return;
+
     }
 
 
-    lista
+    filtradas
         .slice()
         .reverse()
-        .forEach(pedido => {
+        .forEach(
+            venda => {
 
-            tabela.innerHTML += `
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
 
-                <tr>
+
+                tr.innerHTML = `
 
                     <td>
-                        ${formatarData(pedido.data)}
+                        ${formatarData(
+                            new Date(
+                                venda.date
+                            )
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(pedido.cliente)}
+                        ${escaparHTML(
+                            venda.customer
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(pedido.produto)}
+                        ${escaparHTML(
+                            venda.productName
+                        )}
                     </td>
 
                     <td>
-                        ${escaparHTML(pedido.codigo)}
-                    </td>
-
-                    <td>
-                        ${pedido.formaPagamento}
+                        ${venda.quantity}
                     </td>
 
                     <td>
                         <strong>
-                            ${formatarMoeda(pedido.total)}
+                            ${formatarMoeda(
+                                venda.total
+                            )}
                         </strong>
                     </td>
 
                     <td>
-
-                        <button
-                            class="btn btn-pequeno btn-principal"
-                            onclick="imprimirPedido(${pedido.id})"
-                        >
-                            🖨️ Recibo
-                        </button>
-
+                        ${escaparHTML(
+                            venda.payment
+                        )}
                     </td>
 
-                </tr>
+                `;
 
-            `;
 
-        });
+                tabela.appendChild(
+                    tr
+                );
+
+            }
+        );
+
+
+    atualizarIndicadores(
+        filtradas
+    );
 
 }
 
 
-
-/* ==========================================================
-   IMPRIMIR PEDIDO NOVAMENTE
-========================================================== */
-
-function imprimirPedido(id) {
-
-    const pedido =
-        pedidos.find(
-            item => item.id === id
-        );
-
-
-    if (!pedido) return;
-
-
-    prepararRecibo(pedido);
-
-    setTimeout(() => {
-
-        window.print();
-
-    }, 200);
-
-}
-
-
-
-/* ==========================================================
-   FECHAMENTO DO MÊS
-========================================================== */
-
-function fecharMes() {
-
-    const mes =
-        Number(
-            document.getElementById("mesHistorico").value
-        );
-
-
-    const ano =
-        Number(
-            document.getElementById("anoHistorico").value
-        );
-
-
-    const chave =
-        `${ano}-${String(mes + 1).padStart(2, "0")}`;
-
-
-    if (mesesFechados.includes(chave)) {
-
-        alert("Este mês já está fechado.");
-
-        return;
-    }
-
-
-    const pedidosMes =
-        pedidos.filter(
-            pedido =>
-                pedido.mes === mes &&
-                pedido.ano === ano
-        );
-
+function atualizarIndicadores(
+    vendas
+) {
 
     const total =
-        pedidosMes.reduce(
-            (soma, pedido) =>
-                soma + Number(pedido.total),
+        vendas.reduce(
+            (
+                soma,
+                venda
+            ) =>
+                soma +
+                Number(
+                    venda.total
+                ),
             0
         );
 
 
-    const confirmar =
-        confirm(
-            `Fechar ${nomeMes(mes)} de ${ano}?\n\n` +
-            `Pedidos: ${pedidosMes.length}\n` +
-            `Total vendido: ${formatarMoeda(total)}`
+    document.getElementById(
+        "totalHistorico"
+    ).textContent =
+        formatarMoeda(
+            total
         );
 
 
-    if (!confirmar) return;
+    document.getElementById(
+        "quantidadeHistorico"
+    ).textContent =
+        vendas.length;
 
 
-    mesesFechados.push(chave);
+    const produtos = {};
 
-    salvarDados();
 
-    mostrarHistorico();
+    vendas.forEach(
+        venda => {
 
-    alert(
-        `${nomeMes(mes)} de ${ano} foi fechado com sucesso!`
+            produtos[
+                venda.productName
+            ] = (
+                produtos[
+                    venda.productName
+                ] || 0
+            ) +
+            Number(
+                venda.quantity
+            );
+
+        }
     );
+
+
+    let maisVendido =
+        "—";
+
+
+    let maiorQuantidade =
+        0;
+
+
+    Object.entries(
+        produtos
+    ).forEach(
+        (
+            [
+                nome,
+                quantidade
+            ]
+        ) => {
+
+            if (
+                quantidade >
+                maiorQuantidade
+            ) {
+
+                maiorQuantidade =
+                    quantidade;
+
+                maisVendido =
+                    nome;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "maisVendido"
+    ).textContent =
+        maisVendido;
 
 }
 
 
+document
+    .getElementById(
+        "filtroMes"
+    )
+    .addEventListener(
+        "change",
+        renderizarHistorico
+    );
 
-/* ==========================================================
+
+/* =====================================================
    PRODUTOS DE ALUGUEL
-========================================================== */
+===================================================== */
 
-function abrirCadastroAluguel() {
+function carregarProdutosAluguel() {
 
-    document
-        .getElementById("cadastroProdutoAluguel")
-        .classList.remove("oculto");
-
-}
-
-
-
-function fecharCadastroAluguel() {
-
-    document
-        .getElementById("cadastroProdutoAluguel")
-        .classList.add("oculto");
-
-}
-
-
-
-function salvarProdutoAluguel() {
-
-    const codigo =
-        document
-            .getElementById("codigoAluguelProduto")
-            .value
-            .trim();
-
-
-    const nome =
-        document
-            .getElementById("nomeAluguelProduto")
-            .value
-            .trim();
-
-
-    const quantidade =
-        Number(
-            document
-                .getElementById("quantidadeAluguelProduto")
-                .value
+    const produtos =
+        carregarDados(
+            CHAVES.produtosAluguel
         );
 
 
-    const diaria =
-        Number(
-            document
-                .getElementById("valorDiariaAluguel")
-                .value
+    const select =
+        document.getElementById(
+            "produtoAluguel"
         );
 
 
-    if (!codigo || !nome) {
-
-        alert(
-            "Informe o código e o nome do produto."
-        );
-
+    if (!select) {
         return;
     }
 
 
-    if (quantidade < 0 || diaria < 0) {
-
-        alert(
-            "Quantidade e valor não podem ser negativos."
-        );
-
-        return;
-    }
+    select.innerHTML =
+        '<option value="">Selecione o produto</option>';
 
 
-    const codigoExiste =
-        produtosAluguel.some(
+    produtos
+        .filter(
             produto =>
-                produto.codigo.toLowerCase() ===
-                codigo.toLowerCase()
+                produto.quantity > 0
+        )
+        .forEach(
+            produto => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    produto.id;
+
+
+                option.textContent =
+                    `${produto.code} - ${produto.name} | Disponível: ${produto.quantity}`;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
         );
 
 
-    if (codigoExiste) {
+    renderizarEstoqueAluguel();
 
-        alert(
-            "Já existe um produto de aluguel com este código."
-        );
-
-        return;
-    }
+}
 
 
-    produtosAluguel.push({
+/* =====================================================
+   CADASTRAR PRODUTO DE ALUGUEL
+===================================================== */
 
-        id: Date.now(),
+document
+    .getElementById(
+        "formProdutoAluguel"
+    )
+    .addEventListener(
+        "submit",
+        function (evento) {
 
-        codigo: codigo,
-
-        nome: nome,
-
-        quantidade: quantidade,
-
-        diaria: diaria
-
-    });
-
-
-    salvarDados();
-
-    document.getElementById(
-        "codigoAluguelProduto"
-    ).value = "";
+            evento.preventDefault();
 
 
-    document.getElementById(
-        "nomeAluguelProduto"
-    ).value = "";
+            if (
+                !usuarioAtual ||
+                usuarioAtual.tipo !== "admin"
+            ) {
+
+                alert(
+                    "Somente o administrador pode cadastrar produtos de aluguel."
+                );
+
+                return;
+
+            }
 
 
-    document.getElementById(
-        "quantidadeAluguelProduto"
-    ).value = 0;
+            const produtos =
+                carregarDados(
+                    CHAVES.produtosAluguel
+                );
 
 
-    document.getElementById(
-        "valorDiariaAluguel"
-    ).value = "";
+            const codigo =
+                document
+                    .getElementById(
+                        "codigoProdutoAluguel"
+                    )
+                    .value.trim();
 
 
-    fecharCadastroAluguel();
+            const nome =
+                document
+                    .getElementById(
+                        "nomeProdutoAluguel"
+                    )
+                    .value.trim();
 
-    atualizarTudo();
 
-    alert(
-        "Produto de aluguel cadastrado com sucesso!"
+            const quantidade =
+                Number(
+                    document
+                        .getElementById(
+                            "quantidadeProdutoAluguel"
+                        )
+                        .value
+                );
+
+
+            if (
+                produtos.some(
+                    produto =>
+                        produto.code.toLowerCase() ===
+                        codigo.toLowerCase()
+                )
+            ) {
+
+                alert(
+                    "Já existe um produto de aluguel com este código."
+                );
+
+                return;
+
+            }
+
+
+            produtos.push({
+
+                id:
+                    Date.now(),
+
+                code:
+                    codigo,
+
+                name:
+                    nome,
+
+                quantity:
+                    quantidade
+
+            });
+
+
+            salvarDados(
+                CHAVES.produtosAluguel,
+                produtos
+            );
+
+
+            this.reset();
+
+
+            alert(
+                "Produto de aluguel cadastrado!"
+            );
+
+
+            carregarProdutosAluguel();
+
+        }
     );
 
-}
 
+/* =====================================================
+   RENDERIZAR ESTOQUE DE ALUGUEL
+===================================================== */
 
+function renderizarEstoqueAluguel() {
 
-/* ==========================================================
-   ESTOQUE DE ALUGUEL
-========================================================== */
+    const produtos =
+        carregarDados(
+            CHAVES.produtosAluguel
+        );
 
-function mostrarEstoqueAluguel() {
 
     const tabela =
         document.getElementById(
@@ -1468,747 +2222,442 @@ function mostrarEstoqueAluguel() {
     tabela.innerHTML = "";
 
 
-    if (produtosAluguel.length === 0) {
+    if (!produtos.length) {
 
         tabela.innerHTML = `
-            <tr>
-                <td colspan="5" style="text-align:center;">
-                    Nenhum produto de aluguel cadastrado.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    produtosAluguel.forEach(produto => {
-
-        tabela.innerHTML += `
 
             <tr>
 
-                <td>
-                    <strong>
-                        ${escaparHTML(produto.codigo)}
-                    </strong>
-                </td>
-
-                <td>
-                    ${escaparHTML(produto.nome)}
-                </td>
-
-                <td>
-
-                    <strong>
-                        ${produto.quantidade}
-                    </strong>
-
-                </td>
-
-                <td>
-                    ${formatarMoeda(produto.diaria)}
-                </td>
-
-                <td>
-
-                    <button
-                        class="btn btn-pequeno btn-principal"
-                        onclick="alterarEstoqueAluguel(${produto.id})"
-                    >
-                        Alterar
-                    </button>
-
-                    <button
-                        class="btn btn-pequeno btn-perigo"
-                        onclick="excluirProdutoAluguel(${produto.id})"
-                    >
-                        Excluir
-                    </button>
-
+                <td colspan="4">
+                    Nenhum produto cadastrado.
                 </td>
 
             </tr>
 
         `;
 
-    });
-
-}
-
-
-
-function alterarEstoqueAluguel(id) {
-
-    const produto =
-        produtosAluguel.find(
-            item => item.id === id
-        );
-
-
-    if (!produto) return;
-
-
-    const novaQuantidade =
-        prompt(
-            `Quantidade atual: ${produto.quantidade}\n\nDigite a nova quantidade:`,
-            produto.quantidade
-        );
-
-
-    if (novaQuantidade === null) return;
-
-
-    const valor =
-        Number(novaQuantidade);
-
-
-    if (!Number.isInteger(valor) || valor < 0) {
-
-        alert(
-            "Digite uma quantidade inteira válida."
-        );
-
         return;
+
     }
 
 
-    produto.quantidade = valor;
+    produtos.forEach(
+        produto => {
 
-    salvarDados();
+            const tr =
+                document.createElement(
+                    "tr"
+                );
 
-    atualizarTudo();
+
+            tr.innerHTML = `
+
+                <td>
+                    ${escaparHTML(
+                        produto.code
+                    )}
+                </td>
+
+                <td>
+                    ${escaparHTML(
+                        produto.name
+                    )}
+                </td>
+
+                <td>
+                    <strong>
+                        ${produto.quantity}
+                    </strong>
+                </td>
+
+                <td>
+
+                    <div class="acao-tabela">
+
+                        <button
+                            class="btn-mini btn-editar"
+                            onclick="adicionarEstoqueAluguel(${produto.id})"
+                        >
+                            + Estoque
+                        </button>
+
+                        <button
+                            class="btn-mini btn-excluir"
+                            onclick="excluirProdutoAluguel(${produto.id})"
+                        >
+                            Excluir
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            tabela.appendChild(
+                tr
+            );
+
+        }
+    );
 
 }
 
 
+/* =====================================================
+   ADICIONAR ESTOQUE DE ALUGUEL
+===================================================== */
 
-function excluirProdutoAluguel(id) {
-
-    const produto =
-        produtosAluguel.find(
-            item => item.id === id
-        );
-
-
-    if (!produto) return;
-
-
-    const confirmar =
-        confirm(
-            `Excluir "${produto.nome}" do estoque de aluguel?`
-        );
-
-
-    if (!confirmar) return;
-
-
-    produtosAluguel =
-        produtosAluguel.filter(
-            item => item.id !== id
-        );
-
-
-    salvarDados();
-
-    atualizarTudo();
-
-}
-
-
-
-/* ==========================================================
-   SELECT DO ALUGUEL
-========================================================== */
-
-function atualizarSelectAluguel() {
-
-    const select =
-        document.getElementById("produtoAluguel");
-
-
-    if (!select) return;
-
-
-    const valorAtual =
-        select.value;
-
-
-    select.innerHTML = `
-        <option value="">
-            Selecione o produto
-        </option>
-    `;
-
-
-    produtosAluguel
-        .filter(
-            produto => produto.quantidade > 0
-        )
-        .forEach(produto => {
-
-            const option =
-                document.createElement("option");
-
-
-            option.value =
-                produto.id;
-
-
-            option.textContent =
-                `${produto.nome} — Disponível: ${produto.quantidade}`;
-
-
-            select.appendChild(option);
-
-        });
-
+function adicionarEstoqueAluguel(
+    id
+) {
 
     if (
-        produtosAluguel.some(
-            produto =>
-                String(produto.id) ===
-                String(valorAtual)
-        )
+        !usuarioAtual ||
+        usuarioAtual.tipo !== "admin"
     ) {
 
-        select.value = valorAtual;
-
-    }
-
-}
-
-
-
-function selecionarProdutoAluguel() {
-
-    const id =
-        Number(
-            document.getElementById(
-                "produtoAluguel"
-            ).value
+        alert(
+            "Somente o administrador pode alterar o estoque de aluguel."
         );
-
-
-    const produto =
-        produtosAluguel.find(
-            item => item.id === id
-        );
-
-
-    if (!produto) {
-
-        document.getElementById(
-            "diariaAluguel"
-        ).value = "R$ 0,00";
-
-        calcularAluguel();
 
         return;
-    }
-
-
-    document.getElementById(
-        "diariaAluguel"
-    ).value =
-        formatarMoeda(produto.diaria);
-
-
-    calcularAluguel();
-
-}
-
-
-
-/* ==========================================================
-   DATA DO ALUGUEL
-========================================================== */
-
-function definirDataAluguel() {
-
-    const input =
-        document.getElementById(
-            "dataInicioAluguel"
-        );
-
-
-    if (!input) return;
-
-
-    const hoje =
-        new Date();
-
-
-    input.value =
-        formatarDataInput(hoje);
-
-
-    calcularAluguel();
-
-}
-
-
-
-function calcularAluguel() {
-
-    const dataInicio =
-        document.getElementById(
-            "dataInicioAluguel"
-        ).value;
-
-
-    const dias =
-        Number(
-            document.getElementById(
-                "diasAluguel"
-            ).value
-        ) || 0;
-
-
-    const produtoId =
-        Number(
-            document.getElementById(
-                "produtoAluguel"
-            ).value
-        );
-
-
-    const produto =
-        produtosAluguel.find(
-            item => item.id === produtoId
-        );
-
-
-    if (dataInicio && dias > 0) {
-
-        const data =
-            criarDataLocal(dataInicio);
-
-
-        data.setDate(
-            data.getDate() + dias
-        );
-
-
-        document.getElementById(
-            "dataFimAluguel"
-        ).value =
-            formatarDataInput(data);
 
     }
-
-
-    if (produto) {
-
-        const quantidade =
-            Number(
-                document.getElementById(
-                    "quantidadeAluguel"
-                ).value
-            ) || 0;
-
-
-        const total =
-            produto.diaria *
-            dias *
-            quantidade;
-
-
-        document.getElementById(
-            "totalAluguel"
-        ).textContent =
-            formatarMoeda(total);
-
-    } else {
-
-        document.getElementById(
-            "totalAluguel"
-        ).textContent =
-            "R$ 0,00";
-
-    }
-
-}
-
-
-
-/* ==========================================================
-   FINALIZAR ALUGUEL
-========================================================== */
-
-function finalizarAluguel() {
-
-    const cliente =
-        document
-            .getElementById("clienteAluguel")
-            .value
-            .trim();
-
-
-    const cpf =
-        document
-            .getElementById("cpfAluguel")
-            .value
-            .trim();
-
-
-    const telefone =
-        document
-            .getElementById("telefoneAluguel")
-            .value
-            .trim();
-
-
-    const endereco =
-        document
-            .getElementById("enderecoAluguel")
-            .value
-            .trim();
-
-
-    const produtoId =
-        Number(
-            document
-                .getElementById("produtoAluguel")
-                .value
-        );
 
 
     const quantidade =
         Number(
-            document
-                .getElementById("quantidadeAluguel")
-                .value
+            prompt(
+                "Quantidade que chegou:"
+            )
         );
 
 
-    const dataInicio =
-        document
-            .getElementById("dataInicioAluguel")
-            .value;
-
-
-    const dias =
-        Number(
-            document
-                .getElementById("diasAluguel")
-                .value
-        );
-
-
-    if (!cliente) {
-
-        alert(
-            "Informe o nome do cliente."
-        );
+    if (
+        !Number.isFinite(
+            quantidade
+        ) ||
+        quantidade <= 0
+    ) {
 
         return;
+
     }
 
 
-    if (!cpf) {
-
-        alert(
-            "Informe o CPF."
+    const produtos =
+        carregarDados(
+            CHAVES.produtosAluguel
         );
-
-        return;
-    }
-
-
-    if (!produtoId) {
-
-        alert(
-            "Selecione o produto."
-        );
-
-        return;
-    }
-
-
-    if (!quantidade || quantidade <= 0) {
-
-        alert(
-            "Informe uma quantidade válida."
-        );
-
-        return;
-    }
-
-
-    if (!dataInicio || !dias || dias <= 0) {
-
-        alert(
-            "Informe o período do aluguel."
-        );
-
-        return;
-    }
 
 
     const produto =
-        produtosAluguel.find(
-            item => item.id === produtoId
+        produtos.find(
+            item =>
+                item.id === id
         );
 
 
     if (!produto) {
-
-        alert(
-            "Produto não encontrado."
-        );
-
         return;
     }
 
 
-    if (produto.quantidade < quantidade) {
-
-        alert(
-            `Quantidade insuficiente.\n\nDisponível: ${produto.quantidade}`
-        );
-
-        return;
-    }
-
-
-    const dataFim =
-        criarDataLocal(dataInicio);
-
-
-    dataFim.setDate(
-        dataFim.getDate() + dias
-    );
-
-
-    const total =
-        produto.diaria *
-        dias *
+    produto.quantity +=
         quantidade;
 
 
-    /* BAIXA DO ESTOQUE */
-
-    produto.quantidade -= quantidade;
-
-
-    /* REGISTRA ALUGUEL */
-
-    const aluguel = {
-
-        id: Date.now(),
-
-        cliente: cliente,
-
-        cpf: cpf,
-
-        telefone: telefone,
-
-        endereco: endereco,
-
-        produtoId: produto.id,
-
-        produto: produto.nome,
-
-        codigo: produto.codigo,
-
-        quantidade: quantidade,
-
-        diaria: produto.diaria,
-
-        dias: dias,
-
-        total: total,
-
-        dataInicio: dataInicio,
-
-        dataFim: formatarDataInput(dataFim),
-
-        status: "ativo",
-
-        criadoEm: new Date().toISOString()
-
-    };
-
-
-    alugueis.push(aluguel);
-
-    salvarDados();
-
-    limparAluguel();
-
-    atualizarTudo();
-
-    abrirSubAbaAluguelPorId("pendentesAluguel");
-
-
-    alert(
-        "Aluguel registrado com sucesso!"
-    );
-
-}
-
-
-
-/* ==========================================================
-   LIMPAR ALUGUEL
-========================================================== */
-
-function limparAluguel() {
-
-    document.getElementById(
-        "clienteAluguel"
-    ).value = "";
-
-
-    document.getElementById(
-        "cpfAluguel"
-    ).value = "";
-
-
-    document.getElementById(
-        "telefoneAluguel"
-    ).value = "";
-
-
-    document.getElementById(
-        "enderecoAluguel"
-    ).value = "";
-
-
-    document.getElementById(
-        "produtoAluguel"
-    ).value = "";
-
-
-    document.getElementById(
-        "quantidadeAluguel"
-    ).value = 1;
-
-
-    document.getElementById(
-        "diariaAluguel"
-    ).value = "R$ 0,00";
-
-
-    document.getElementById(
-        "diasAluguel"
-    ).value = 7;
-
-
-    document.getElementById(
-        "totalAluguel"
-    ).textContent = "R$ 0,00";
-
-
-    definirDataAluguel();
-
-}
-
-
-
-/* ==========================================================
-   SUB-ABAS ALUGUEL
-========================================================== */
-
-function abrirSubAbaAluguel(id, botao) {
-
-    document.querySelectorAll(".sub-aba").forEach(
-        aba => aba.classList.remove("aluguel-ativa")
+    salvarDados(
+        CHAVES.produtosAluguel,
+        produtos
     );
 
 
-    const alvo =
-        document.getElementById(id);
+    carregarProdutosAluguel();
+
+}
 
 
-    if (alvo) {
+/* =====================================================
+   EXCLUIR PRODUTO DE ALUGUEL
+===================================================== */
 
-        alvo.classList.add("aluguel-ativa");
+function excluirProdutoAluguel(
+    id
+) {
+
+    if (
+        !usuarioAtual ||
+        usuarioAtual.tipo !== "admin"
+    ) {
+
+        alert(
+            "Somente o administrador pode excluir produtos."
+        );
+
+        return;
 
     }
 
 
-    document.querySelectorAll(".sub-btn").forEach(
-        btn => btn.classList.remove("ativo")
+    if (
+        !confirm(
+            "Deseja excluir este produto?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    let produtos =
+        carregarDados(
+            CHAVES.produtosAluguel
+        );
+
+
+    produtos =
+        produtos.filter(
+            produto =>
+                produto.id !== id
+        );
+
+
+    salvarDados(
+        CHAVES.produtosAluguel,
+        produtos
     );
 
 
-    if (botao) {
-
-        botao.classList.add("ativo");
-
-    }
-
-
-    if (id === "estoqueAluguel") {
-
-        mostrarEstoqueAluguel();
-
-    }
-
-
-    if (id === "novoAluguel") {
-
-        atualizarSelectAluguel();
-
-    }
-
-
-    if (id === "pendentesAluguel") {
-
-        mostrarAlugueis();
-
-    }
+    carregarProdutosAluguel();
 
 }
 
 
+/* =====================================================
+   NOVO ALUGUEL
+===================================================== */
 
-function abrirSubAbaAluguelPorId(id) {
+document
+    .getElementById(
+        "formAluguel"
+    )
+    .addEventListener(
+        "submit",
+        function (evento) {
 
-    const botoes =
-        document.querySelectorAll(".sub-btn");
+            evento.preventDefault();
 
 
-    if (id === "estoqueAluguel") {
+            const produtos =
+                carregarDados(
+                    CHAVES.produtosAluguel
+                );
 
-        abrirSubAbaAluguel(
-            id,
-            botoes[0]
+
+            const produto =
+                produtos.find(
+                    item =>
+                        String(item.id) ===
+                        String(
+                            document
+                                .getElementById(
+                                    "produtoAluguel"
+                                )
+                                .value
+                        )
+                );
+
+
+            if (!produto) {
+
+                alert(
+                    "Selecione um produto."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                produto.quantity <= 0
+            ) {
+
+                alert(
+                    "Este produto não possui unidades disponíveis."
+                );
+
+                return;
+
+            }
+
+
+            const dias =
+                Number(
+                    document
+                        .getElementById(
+                            "duracaoAluguel"
+                        )
+                        .value
+                );
+
+
+            if (
+                !Number.isInteger(dias) ||
+                dias <= 0
+            ) {
+
+                alert(
+                    "Digite uma duração válida."
+                );
+
+                return;
+
+            }
+
+
+            const inicio =
+                new Date();
+
+
+            const vencimento =
+                new Date(
+                    inicio
+                );
+
+
+            vencimento.setDate(
+                vencimento.getDate() +
+                dias
+            );
+
+
+            produto.quantity -= 1;
+
+
+            const estoqueSalvo =
+                salvarDados(
+                    CHAVES.produtosAluguel,
+                    produtos
+                );
+
+
+            if (!estoqueSalvo) {
+                return;
+            }
+
+
+            const alugueis =
+                carregarDados(
+                    CHAVES.alugueis
+                );
+
+
+            alugueis.push({
+
+                id:
+                    Date.now(),
+
+                customer:
+                    document
+                        .getElementById(
+                            "clienteAluguel"
+                        )
+                        .value.trim(),
+
+                cpf:
+                    document
+                        .getElementById(
+                            "cpfAluguel"
+                        )
+                        .value.trim(),
+
+                phone:
+                    document
+                        .getElementById(
+                            "telefoneAluguel"
+                        )
+                        .value.trim(),
+
+                address:
+                    document
+                        .getElementById(
+                            "enderecoAluguel"
+                        )
+                        .value.trim(),
+
+                productId:
+                    produto.id,
+
+                productCode:
+                    produto.code,
+
+                productName:
+                    produto.name,
+
+                startDate:
+                    inicio.toISOString(),
+
+                dueDate:
+                    vencimento.toISOString(),
+
+                durationDays:
+                    dias,
+
+                returned:
+                    false,
+
+                returnDate:
+                    null
+
+            });
+
+
+            const aluguelSalvo =
+                salvarDados(
+                    CHAVES.alugueis,
+                    alugueis
+                );
+
+
+            if (!aluguelSalvo) {
+                return;
+            }
+
+
+            this.reset();
+
+
+            alert(
+                "Aluguel registrado com sucesso!"
+            );
+
+
+            carregarProdutosAluguel();
+
+            renderizarAlugueis();
+
+            verificarAtrasos();
+
+        }
+    );
+
+
+/* =====================================================
+   RENDERIZAR ALUGUÉIS
+===================================================== */
+
+function renderizarAlugueis() {
+
+    const alugueis =
+        carregarDados(
+            CHAVES.alugueis
         );
 
-    }
-
-
-    if (id === "novoAluguel") {
-
-        abrirSubAbaAluguel(
-            id,
-            botoes[1]
-        );
-
-    }
-
-
-    if (id === "pendentesAluguel") {
-
-        abrirSubAbaAluguel(
-            id,
-            botoes[2]
-        );
-
-    }
-
-}
-
-
-
-/* ==========================================================
-   ALUGUÉIS ATIVOS
-========================================================== */
-
-function mostrarAlugueis() {
 
     const tabela =
         document.getElementById(
@@ -2219,703 +2668,693 @@ function mostrarAlugueis() {
     tabela.innerHTML = "";
 
 
-    const ativos =
-        alugueis.filter(
-            aluguel =>
-                aluguel.status !== "devolvido"
-        );
-
-
-    let atrasados = 0;
-
-    let vencendoHoje = 0;
-
-
-    ativos.forEach(aluguel => {
-
-        const status =
-            verificarStatusAluguel(aluguel);
-
-
-        if (status === "atrasado") {
-
-            atrasados++;
-
-        }
-
-
-        if (status === "vencendo") {
-
-            vencendoHoje++;
-
-        }
-
-
-        tabela.innerHTML += `
-
-            <tr>
-
-                <td>
-
-                    <strong>
-                        ${escaparHTML(aluguel.cliente)}
-                    </strong>
-
-                    <br>
-
-                    <small>
-                        CPF: ${escaparHTML(aluguel.cpf)}
-                    </small>
-
-                </td>
-
-
-                <td>
-
-                    ${escaparHTML(aluguel.produto)}
-
-                    <br>
-
-                    <small>
-                        Qtd: ${aluguel.quantidade}
-                    </small>
-
-                </td>
-
-
-                <td>
-                    ${formatarDataBR(aluguel.dataInicio)}
-                </td>
-
-
-                <td>
-                    ${formatarDataBR(aluguel.dataFim)}
-                </td>
-
-
-                <td>
-                    ${formatarMoeda(aluguel.total)}
-                </td>
-
-
-                <td>
-                    ${criarStatusAluguel(status)}
-                </td>
-
-
-                <td>
-
-                    <button
-                        class="btn btn-pequeno btn-sucesso"
-                        onclick="devolverAluguel(${aluguel.id})"
-                    >
-                        Devolver
-                    </button>
-
-                    <button
-                        class="btn btn-pequeno btn-aviso"
-                        onclick="renovarAluguel(${aluguel.id})"
-                    >
-                        Renovar
-                    </button>
-
-                </td>
-
-            </tr>
-
-        `;
-
-    });
-
-
-    document.getElementById(
-        "totalAlugueisAtivos"
-    ).textContent =
-        ativos.length;
-
-
-    document.getElementById(
-        "totalAlugueisHoje"
-    ).textContent =
-        vencendoHoje;
-
-
-    document.getElementById(
-        "totalAlugueisAtrasados"
-    ).textContent =
-        atrasados;
-
-
-    const alerta =
-        document.getElementById(
-            "alertaAlugueis"
-        );
-
-
-    if (atrasados > 0) {
-
-        alerta.classList.remove("oculto");
-
-        alerta.innerHTML =
-            `🚨 Atenção: existem <strong>${atrasados}</strong> aluguel(is) atrasado(s). Verifique os clientes abaixo.`;
-
-    } else {
-
-        alerta.classList.add("oculto");
-
-        alerta.innerHTML = "";
-
-    }
-
-
-    if (ativos.length === 0) {
+    if (!alugueis.length) {
 
         tabela.innerHTML = `
+
             <tr>
-                <td colspan="7" style="text-align:center;">
-                    Nenhum aluguel ativo no momento.
+
+                <td colspan="6">
+                    Nenhum aluguel registrado.
                 </td>
+
             </tr>
+
         `;
 
+        return;
+
     }
+
+
+    alugueis
+        .slice()
+        .reverse()
+        .forEach(
+            aluguel => {
+
+                const status =
+                    obterStatusAluguel(
+                        aluguel
+                    );
+
+
+                const tr =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                let botoes = "";
+
+
+                if (
+                    !aluguel.returned
+                ) {
+
+                    botoes += `
+
+                        <button
+                            class="btn-mini btn-devolver"
+                            onclick="devolverAluguel(${aluguel.id})"
+                        >
+                            Devolver
+                        </button>
+
+                        <button
+                            class="btn-mini btn-renovar"
+                            onclick="renovarAluguel(${aluguel.id})"
+                        >
+                            Renovar
+                        </button>
+
+                    `;
+
+                }
+
+
+                tr.innerHTML = `
+
+                    <td>
+                        ${escaparHTML(
+                            aluguel.customer
+                        )}
+                    </td>
+
+                    <td>
+                        ${escaparHTML(
+                            aluguel.productName
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatarData(
+                            new Date(
+                                aluguel.startDate
+                            )
+                        )}
+                    </td>
+
+                    <td>
+                        ${formatarData(
+                            new Date(
+                                aluguel.dueDate
+                            )
+                        )}
+                    </td>
+
+                    <td>
+                        ${status.html}
+                    </td>
+
+                    <td>
+
+                        <div class="acao-tabela">
+                            ${botoes}
+                        </div>
+
+                    </td>
+
+                `;
+
+
+                tabela.appendChild(
+                    tr
+                );
+
+            }
+        );
 
 }
 
 
-
-/* ==========================================================
+/* =====================================================
    STATUS DO ALUGUEL
-========================================================== */
+===================================================== */
 
-function verificarStatusAluguel(aluguel) {
+function obterStatusAluguel(
+    aluguel
+) {
 
-    if (aluguel.status === "devolvido") {
+    if (
+        aluguel.returned
+    ) {
 
-        return "devolvido";
+        return {
+
+            texto:
+                "Devolvido",
+
+            html:
+                '<span class="status status-devolvido">Devolvido</span>'
+
+        };
 
     }
 
 
-    const hoje =
-        zerarHora(new Date());
+    const agora =
+        new Date();
 
 
-    const fim =
-        zerarHora(
-            criarDataLocal(aluguel.dataFim)
+    const vencimento =
+        new Date(
+            aluguel.dueDate
         );
-
-
-    if (hoje > fim) {
-
-        aluguel.status = "atrasado";
-
-        return "atrasado";
-
-    }
 
 
     if (
-        hoje.getTime() ===
-        fim.getTime()
+        agora >
+        vencimento
     ) {
 
-        aluguel.status = "vencendo";
+        return {
 
-        return "vencendo";
+            texto:
+                "Atrasado",
+
+            html:
+                '<span class="status status-atrasado">Atrasado</span>'
+
+        };
 
     }
 
 
-    aluguel.status = "ativo";
+    return {
 
-    return "ativo";
+        texto:
+            "Alugado",
+
+        html:
+            '<span class="status status-ativo">Alugado</span>'
+
+    };
 
 }
 
 
+/* =====================================================
+   DEVOLVER ALUGUEL
+===================================================== */
 
-function criarStatusAluguel(status) {
+function devolverAluguel(
+    id
+) {
 
-    if (status === "atrasado") {
+    const alugueis =
+        carregarDados(
+            CHAVES.alugueis
+        );
 
-        return `
-            <span class="status status-atrasado">
-                🚨 ATRASADO
-            </span>
-        `;
-
-    }
-
-
-    if (status === "vencendo") {
-
-        return `
-            <span class="status status-vencendo">
-                ⚠️ DEVOLVER HOJE
-            </span>
-        `;
-
-    }
-
-
-    if (status === "devolvido") {
-
-        return `
-            <span class="status status-devolvido">
-                ✓ DEVOLVIDO
-            </span>
-        `;
-
-    }
-
-
-    return `
-        <span class="status status-ativo">
-            ✓ ATIVO
-        </span>
-    `;
-
-}
-
-
-
-/* ==========================================================
-   DEVOLVER
-========================================================== */
-
-function devolverAluguel(id) {
 
     const aluguel =
         alugueis.find(
-            item => item.id === id
-        );
-
-
-    if (!aluguel) return;
-
-
-    const confirmar =
-        confirm(
-            `Registrar devolução?\n\n` +
-            `Cliente: ${aluguel.cliente}\n` +
-            `Produto: ${aluguel.produto}`
-        );
-
-
-    if (!confirmar) return;
-
-
-    const produto =
-        produtosAluguel.find(
             item =>
-                item.id === aluguel.produtoId
+                item.id === id
         );
 
 
-    if (produto) {
+    if (
+        !aluguel ||
+        aluguel.returned
+    ) {
 
-        produto.quantidade +=
-            aluguel.quantidade;
+        return;
 
     }
 
 
-    aluguel.status = "devolvido";
-
-    aluguel.dataDevolucao =
-        formatarDataInput(
-            new Date()
-        );
-
-
-    salvarDados();
-
-    atualizarTudo();
-
-    alert(
-        "Devolução registrada e produto devolvido ao estoque."
-    );
-
-}
-
-
-
-/* ==========================================================
-   RENOVAÇÃO
-========================================================== */
-
-function renovarAluguel(id) {
-
-    const aluguel =
-        alugueis.find(
-            item => item.id === id
-        );
-
-
-    if (!aluguel) return;
-
-
-    const dias =
-        prompt(
-            "Quantos dias deseja renovar?",
-            "7"
-        );
-
-
-    if (dias === null) return;
-
-
-    const quantidadeDias =
-        Number(dias);
-
-
     if (
-        !Number.isInteger(quantidadeDias) ||
-        quantidadeDias <= 0
+        !confirm(
+            "Confirmar devolução do produto?"
+        )
     ) {
 
-        alert(
-            "Informe uma quantidade válida de dias."
+        return;
+
+    }
+
+
+    aluguel.returned =
+        true;
+
+
+    aluguel.returnDate =
+        new Date().toISOString();
+
+
+    const aluguelSalvo =
+        salvarDados(
+            CHAVES.alugueis,
+            alugueis
         );
 
+
+    if (!aluguelSalvo) {
         return;
     }
 
 
-    let dataBase;
-
-
-    if (
-        aluguel.status === "atrasado"
-    ) {
-
-        dataBase = new Date();
-
-    } else {
-
-        dataBase =
-            criarDataLocal(
-                aluguel.dataFim
-            );
-
-    }
-
-
-    dataBase.setDate(
-        dataBase.getDate() + quantidadeDias
-    );
-
-
-    aluguel.dataFim =
-        formatarDataInput(dataBase);
-
-
-    aluguel.dias += quantidadeDias;
+    const produtos =
+        carregarDados(
+            CHAVES.produtosAluguel
+        );
 
 
     const produto =
-        produtosAluguel.find(
+        produtos.find(
             item =>
-                item.id === aluguel.produtoId
+                item.id ===
+                aluguel.productId
         );
 
 
     if (produto) {
 
-        aluguel.total +=
-            produto.diaria *
-            aluguel.quantidade *
-            quantidadeDias;
+        produto.quantity +=
+            1;
 
     }
 
 
-    aluguel.status = "ativo";
+    salvarDados(
+        CHAVES.produtosAluguel,
+        produtos
+    );
 
 
-    salvarDados();
+    carregarProdutosAluguel();
 
-    atualizarTudo();
+    renderizarAlugueis();
+
+    verificarAtrasos();
 
 
     alert(
-        `Aluguel renovado por mais ${quantidadeDias} dia(s).`
+        "Produto devolvido e estoque atualizado!"
     );
 
 }
 
 
+/* =====================================================
+   RENOVAR ALUGUEL
+===================================================== */
 
-/* ==========================================================
-   VERIFICAÇÃO DE ATRASOS
-========================================================== */
+function renovarAluguel(
+    id
+) {
 
-function verificarAlugueisAtrasados() {
-
-    let mudou = false;
-
-
-    alugueis.forEach(aluguel => {
-
-        if (
-            aluguel.status !== "devolvido"
-        ) {
-
-            const antigo =
-                aluguel.status;
+    const dias =
+        Number(
+            prompt(
+                "Quantos dias deseja acrescentar?",
+                "7"
+            )
+        );
 
 
-            const novo =
-                verificarStatusAluguel(aluguel);
+    if (
+        !Number.isFinite(dias) ||
+        dias <= 0
+    ) {
 
-
-            if (antigo !== novo) {
-
-                mudou = true;
-
-            }
-
-        }
-
-    });
-
-
-    if (mudou) {
-
-        salvarDados();
+        return;
 
     }
 
 
-    mostrarAlugueis();
+    const alugueis =
+        carregarDados(
+            CHAVES.alugueis
+        );
+
+
+    const aluguel =
+        alugueis.find(
+            item =>
+                item.id === id
+        );
+
+
+    if (!aluguel) {
+        return;
+    }
+
+
+    const vencimento =
+        new Date(
+            aluguel.dueDate
+        );
+
+
+    vencimento.setDate(
+        vencimento.getDate() +
+        dias
+    );
+
+
+    aluguel.dueDate =
+        vencimento.toISOString();
+
+
+    salvarDados(
+        CHAVES.alugueis,
+        alugueis
+    );
+
+
+    renderizarAlugueis();
+
+    verificarAtrasos();
+
+
+    alert(
+        "Aluguel renovado com sucesso!"
+    );
 
 }
 
 
+/* =====================================================
+   VERIFICAR ATRASOS
+===================================================== */
 
-/* ==========================================================
+function verificarAtrasos() {
+
+    const alugueis =
+        carregarDados(
+            CHAVES.alugueis
+        );
+
+
+    const atrasados =
+        alugueis.filter(
+            aluguel => {
+
+                if (
+                    aluguel.returned
+                ) {
+
+                    return false;
+
+                }
+
+
+                return new Date() >
+                    new Date(
+                        aluguel.dueDate
+                    );
+
+            }
+        );
+
+
+    const alerta =
+        document.getElementById(
+            "alertaAluguel"
+        );
+
+
+    if (
+        atrasados.length > 0
+    ) {
+
+        alerta.classList.remove(
+            "escondido"
+        );
+
+
+        alerta.textContent =
+            `⚠️ Existem ${atrasados.length} aluguel(is) atrasado(s)!`;
+
+    } else {
+
+        alerta.classList.add(
+            "escondido"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SUB-MENU ALUGUEL
+===================================================== */
+
+document
+    .querySelectorAll(
+        ".sub-btn"
+    )
+    .forEach(
+        botao => {
+
+            botao.addEventListener(
+                "click",
+                function () {
+
+                    const sub =
+                        this.dataset.sub;
+
+
+                    if (
+                        sub ===
+                        "estoque-aluguel" &&
+                        usuarioAtual.tipo !==
+                        "admin"
+                    ) {
+
+                        alert(
+                            "Somente o administrador pode acessar o estoque de aluguel."
+                        );
+
+                        return;
+
+                    }
+
+
+                    document
+                        .querySelectorAll(
+                            ".sub-btn"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "ativo"
+                                )
+                        );
+
+
+                    document
+                        .querySelectorAll(
+                            ".sub-aba"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "ativa"
+                                )
+                        );
+
+
+                    this.classList.add(
+                        "ativo"
+                    );
+
+
+                    const elemento =
+                        document.getElementById(
+                            "sub-" + sub
+                        );
+
+
+                    if (elemento) {
+
+                        elemento.classList.add(
+                            "ativa"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+/* =====================================================
    ATUALIZAR TUDO
-========================================================== */
+===================================================== */
 
 function atualizarTudo() {
 
-    atualizarSelectProdutos();
-
-    mostrarEstoque();
-
-    mostrarHistorico();
-
-    mostrarEstoqueAluguel();
-
-    atualizarSelectAluguel();
-
-    mostrarAlugueis();
-
-}
+    if (!usuarioAtual) {
+        return;
+    }
 
 
+    carregarProdutos();
 
-/* ==========================================================
-   MODAL
-========================================================== */
+    carregarProdutosAluguel();
 
-function abrirModal(conteudo) {
+    renderizarAlugueis();
 
-    document.getElementById(
-        "conteudoModal"
-    ).innerHTML = conteudo;
+    renderizarHistorico();
 
+    verificarAtrasos();
 
-    document.getElementById(
-        "modal"
-    ).classList.add("aberto");
+    atualizarPagamento();
+
+    atualizarVenda();
 
 }
 
 
+/* =====================================================
+   FORMULÁRIOS
+===================================================== */
 
-function fecharModal() {
+document
+    .getElementById(
+        "formVenda"
+    )
+    .addEventListener(
+        "reset",
+        function () {
 
-    document.getElementById(
-        "modal"
-    ).classList.remove("aberto");
+            setTimeout(
+                function () {
 
-}
+                    atualizarPagamento();
+
+                    atualizarVenda();
+
+                },
+                0
+            );
+
+        }
+    );
 
 
+/* =====================================================
+   SALVAMENTO AUTOMÁTICO DE SEGURANÇA
+===================================================== */
 
-/* ==========================================================
-   FORMATAÇÕES
-========================================================== */
+window.addEventListener(
+    "beforeunload",
+    function () {
 
-function formatarMoeda(valor) {
+        salvarTodosOsDados();
 
-    return Number(valor || 0).toLocaleString(
+    }
+);
+
+
+/* =====================================================
+   VISIBILIDADE DA PÁGINA
+===================================================== */
+
+document.addEventListener(
+    "visibilitychange",
+    function () {
+
+        if (
+            document.visibilityState ===
+            "hidden"
+        ) {
+
+            salvarTodosOsDados();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   FORMATAR MOEDA
+===================================================== */
+
+function formatarMoeda(
+    valor
+) {
+
+    return new Intl.NumberFormat(
         "pt-BR",
         {
             style: "currency",
             currency: "BRL"
         }
+    ).format(
+        Number(valor) || 0
     );
 
 }
 
 
+/* =====================================================
+   FORMATAR DATA
+===================================================== */
 
-function formatarData(data) {
+function formatarData(
+    data
+) {
 
-    return new Date(data).toLocaleDateString(
+    return data.toLocaleDateString(
         "pt-BR"
     );
 
 }
 
 
+/* =====================================================
+   ESCAPAR HTML
+===================================================== */
 
-function formatarDataHora(data) {
+function escaparHTML(
+    texto
+) {
 
-    return new Date(data).toLocaleString(
-        "pt-BR"
-    );
+    return String(
+        texto ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
 }
 
 
+/* =====================================================
+   INICIAR SISTEMA
+===================================================== */
 
-function formatarDataInput(data) {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    const ano =
-        data.getFullYear();
-
-
-    const mes =
-        String(
-            data.getMonth() + 1
-        ).padStart(2, "0");
-
-
-    const dia =
-        String(
-            data.getDate()
-        ).padStart(2, "0");
-
-
-    return `${ano}-${mes}-${dia}`;
-
-}
-
-
-
-function formatarDataBR(data) {
-
-    if (!data) return "";
-
-    const partes =
-        data.split("-");
-
-
-    if (partes.length !== 3) {
-
-        return data;
+        verificarSessao();
 
     }
-
-
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-
-}
-
-
-
-function criarDataLocal(valor) {
-
-    if (!valor) {
-
-        return new Date();
-
-    }
-
-
-    const partes =
-        valor.split("-");
-
-
-    if (partes.length !== 3) {
-
-        return new Date(valor);
-
-    }
-
-
-    return new Date(
-        Number(partes[0]),
-        Number(partes[1]) - 1,
-        Number(partes[2])
-    );
-
-}
-
-
-
-function zerarHora(data) {
-
-    const nova =
-        new Date(data);
-
-
-    nova.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-
-    return nova;
-
-}
-
-
-
-function nomeMes(mes) {
-
-    const meses = [
-
-        "Janeiro",
-        "Fevereiro",
-        "Março",
-        "Abril",
-        "Maio",
-        "Junho",
-        "Julho",
-        "Agosto",
-        "Setembro",
-        "Outubro",
-        "Novembro",
-        "Dezembro"
-
-    ];
-
-
-    return meses[mes];
-
-}
-
-
-
-/* ==========================================================
-   SEGURANÇA BÁSICA PARA TEXTOS
-========================================================== */
-
-function escaparHTML(texto) {
-
-    return String(texto ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
+);
